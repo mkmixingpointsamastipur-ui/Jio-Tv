@@ -201,7 +201,7 @@ video.mode-cover{object-fit:cover!important}
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:21000 !important;
+  z-index:21000 !important; /* Shaka UI Controls से ऊपर रखने के लिए */
   opacity:0;
   pointer-events:none;
   transition:opacity .3s ease;
@@ -291,6 +291,7 @@ video.mode-cover{object-fit:cover!important}
 <style type="text/css">* {user-select: auto !important; -webkit-user-select: auto !important;}</style></head>
 <body>
 
+<!-- Dynamic WhatsApp PopUp Structural Node Layer -->
 <div class="rgb-popup-overlay" id="waPopup">
   <div class="rgb-popup-box">
     <div class="rgb-close-btn" id="popupX">✖</div>
@@ -356,9 +357,7 @@ var COOKIE_SOURCES = {
   mb: "https://mbcookie.amitbala1993.workers.dev/",
   pl: "https://plcookie.amitbala1993.workers.dev/",
   sayan: "https://sayan-json-3.pages.dev/Data/sports.json",
-  binge: "https://binge-giotv.pages.dev/data/id.json",
-  fallback1: "https://eerajson.pages.dev/Data/jtv.json", 
-  fallback2: "YOUR_FALLBACK_URL_2_HERE"
+  binge: "https://binge-giotv.pages.dev/data/id.json"
 };
 var hdneaRegex = /__hdnea__=[a-zA-Z0-9~=\-\_\/\*]+/;
 var CUSTOM_LOGO = "https://res.cloudinary.com/dgktl7phy/image/upload/f_auto,q_auto/1001220368_dpkmgi";
@@ -450,165 +449,120 @@ function appendCookieToUri(uri, rawCookie) {
   return uri + (uri.indexOf("?") !== -1 ? "&" : "?") + "__hdnea__=" + rawCookie;
 }
 
+// POPUP CLOSE MANAGER
 function closePopup(){
   var waPopup = document.getElementById('waPopup');
   if (waPopup) waPopup.classList.remove('show');
 }
 
-function parseDataToArray(data) {
-  var arr = [];
-  if (Array.isArray(data)) {
-    arr = data;
-  } else if (data && (data.channels || data.result)) {
-    arr = data.channels || data.result || [];
-  } else if (data && typeof data === 'object') {
-    for (var key in data) {
-      if (data.hasOwnProperty(key) && data[key] && typeof data[key] === 'object') {
-        var item = data[key];
-        item.id = item.id || key;
-        arr.push(item);
-      }
-    }
-  }
-  return arr;
-}
-
-// ADVANCED ARCHITECTURE: Collects ALL matching streams across all JSON endpoints
 async function buildPlayerConfigs(targetId) {
-  if (!targetId) return [];
-  var configsList = [];
+  if (!targetId) return null;
+  var baseStreamInfo = null;
+  var possibleCookies = [];
 
-  var mappingSources = [
-    MY_MAIN_JSON, 
-    COOKIE_SOURCES.sayan, 
-    COOKIE_SOURCES.binge,
-    COOKIE_SOURCES.fallback1,
-    COOKIE_SOURCES.fallback2
-  ];
-
+  var mappingSources = [MY_MAIN_JSON, COOKIE_SOURCES.sayan, COOKIE_SOURCES.binge];
   for (var i = 0; i < mappingSources.length; i++) {
     try {
-      if (!mappingSources[i] || mappingSources[i].startsWith("YOUR_")) continue;
       var res = await fetch(mappingSources[i]);
       if (!res.ok) continue;
       var data = await res.json();
-      var arr = parseDataToArray(data);
-      
+      var arr = Array.isArray(data) ? data : (data.channels || data.result || []);
       var found = arr.find(function(c) {
         return String(c.id) === String(targetId) || String(c.channel_id) === String(targetId) || String(c.k_id) === String(targetId);
       });
-      
       if (found) {
-        var rUrl = found.url || found.stream_url || found.channel_url || found.k_url || found.streamUrl || "";
-        if (!rUrl) continue;
-        
-        var kId = found.keyId || found.key_id || found.k_keyId || (found.clearKey && found.clearKey.keyId) || "";
-        var ky = found.key || found.k_key || (found.clearKey && found.clearKey.key) || "";
+        var rUrl = found.url || found.stream_url || found.channel_url || found.k_url || "";
+        var kId = found.keyId || found.key_id || found.k_keyId || "";
+        var ky = found.key || found.k_key || "";
         
         if (!kId || !ky) {
           var hex = [];
           for (var k in found) { if (typeof found[k] === 'string' && /^[a-fA-F0-9]{32}$/.test(found[k])) hex.push(found[k]); }
           if (hex.length >= 2) { kId = kId || hex[0]; ky = ky || hex[1]; }
         }
-        
-        var cleanUrl = rUrl.split('?')[0];
-        
-        // Prevent adding completely identical URLs multiple times
-        var isDuplicate = configsList.some(function(item) { return item.url === cleanUrl; });
-        if (isDuplicate) continue;
-
-        var possibleCookies = [];
+        baseStreamInfo = { url: rUrl.split('?')[0], keyId: kId, key: ky };
         var tk = extractToken(found, rUrl);
         if (tk) possibleCookies.push(tk);
-
-        var myPath = getUrlBasePath(cleanUrl);
-
-        if (cleanUrl.includes("jiotvmb") || cleanUrl.includes("mb")) {
-          try {
-            var mbRes = await fetch(COOKIE_SOURCES.mb);
-            if (mbRes.ok) {
-              var mbData = await mbRes.json();
-              if (Array.isArray(mbData) && mbData.length > 1) {
-                var tkMb = extractToken(mbData[1]);
-                if (tkMb && possibleCookies.indexOf(tkMb) === -1) possibleCookies.push(tkMb);
-              } else {
-                var tkMb = extractToken(mbData);
-                if (tkMb && possibleCookies.indexOf(tkMb) === -1) possibleCookies.push(tkMb);
-              }
-            }
-          } catch(e){}
-        } else {
-          try {
-            var plRes = await fetch(COOKIE_SOURCES.pl);
-            if (plRes.ok) {
-              var plData = await plRes.json();
-              var plChans = [].concat(plData.successful_results || [], plData.failed_results || []);
-              var matchedCookie = plChans.find(function(c) {
-                if (String(c.channel_id) === String(targetId)) return true;
-                var u = c.error_details ? c.error_details.final_url : (c.url || "");
-                return u && getUrlBasePath(u) === myPath;
-              });
-              if (matchedCookie) {
-                var u = matchedCookie.error_details ? matchedCookie.error_details.final_url : (matchedCookie.url || "");
-                var tkPl = extractToken(matchedCookie, u);
-                if (tkPl && possibleCookies.indexOf(tkPl) === -1) possibleCookies.push(tkPl);
-              }
-            }
-          } catch(e){}
-        }
-
-        var poolFallbacks = [COOKIE_SOURCES.sayan, COOKIE_SOURCES.binge, COOKIE_SOURCES.fallback1, COOKIE_SOURCES.fallback2];
-        for (var j = 0; j < poolFallbacks.length; j++) {
-          try {
-            if (!poolFallbacks[j] || poolFallbacks[j].startsWith("YOUR_")) continue;
-            var resFb = await fetch(poolFallbacks[j]);
-            if (!resFb.ok) continue;
-            var dataFb = await resFb.json();
-            var arrFb = parseDataToArray(dataFb);
-            var matchedFb = arrFb.find(function(c) {
-              var u = c.url || c.stream_url || c.channel_url || c.k_url || c.streamUrl || "";
-              return u && getUrlBasePath(u) === myPath;
-            });
-            if (matchedFb) {
-              var u = matchedFb.url || matchedFb.stream_url || matchedFb.streamUrl || "";
-              var tkFb = extractToken(matchedFb, u);
-              if (tkFb && possibleCookies.indexOf(tkFb) === -1) possibleCookies.push(tkFb);
-            }
-          } catch(e){}
-        }
-
-        if (possibleCookies.length === 0) possibleCookies.push("");
-
-        configsList.push({
-          url: cleanUrl,
-          keyId: kId,
-          key: ky,
-          cookies: possibleCookies
-        });
+        break;
       }
     } catch(e){}
   }
-  return configsList;
+
+  if (!baseStreamInfo || !baseStreamInfo.url) return null;
+
+  var streamUrl = baseStreamInfo.url;
+  var myPath = getUrlBasePath(streamUrl);
+
+  if (streamUrl.includes("jiotvmb") || streamUrl.includes("mb")) {
+    try {
+      var mbRes = await fetch(COOKIE_SOURCES.mb);
+      if (mbRes.ok) {
+        var mbData = await mbRes.json();
+        if (Array.isArray(mbData) && mbData.length > 1) {
+          var tk = extractToken(mbData[1]);
+          if (tk) possibleCookies.push(tk);
+        } else {
+          var tk = extractToken(mbData);
+          if (tk) possibleCookies.push(tk);
+        }
+      }
+    } catch(e){}
+  } else {
+    try {
+      var plRes = await fetch(COOKIE_SOURCES.pl);
+      if (plRes.ok) {
+        var plData = await plRes.json();
+        var plChans = [].concat(plData.successful_results || [], plData.failed_results || []);
+        var matched = plChans.find(function(c) {
+          if (String(c.channel_id) === String(targetId)) return true;
+          var u = c.error_details ? c.error_details.final_url : (c.url || "");
+          return u && getUrlBasePath(u) === myPath;
+        });
+        if (matched) {
+          var u = matched.error_details ? matched.error_details.final_url : (matched.url || "");
+          var tk = extractToken(matched, u);
+          if (tk) possibleCookies.push(tk);
+        }
+      }
+    } catch(e){}
+  }
+
+  var poolFallbacks = [COOKIE_SOURCES.sayan, COOKIE_SOURCES.binge];
+  for (var j = 0; j < poolFallbacks.length; j++) {
+    try {
+      var res = await fetch(poolFallbacks[j]);
+      if (!res.ok) continue;
+      var data = await res.json();
+      var arr = Array.isArray(data) ? data : (data.channels || data.result || []);
+      var matched = arr.find(function(c) {
+        var u = c.url || c.stream_url || c.channel_url || c.k_url || "";
+        return u && getUrlBasePath(u) === myPath;
+      });
+      if (matched) {
+        var u = matched.url || matched.stream_url || "";
+        var tk = extractToken(matched, u);
+        if (tk && possibleCookies.indexOf(tk) === -1) possibleCookies.push(tk);
+      }
+    } catch(e){}
+  }
+
+  return {
+    url: streamUrl,
+    keyId: baseStreamInfo.keyId,
+    key: baseStreamInfo.key,
+    cookies: possibleCookies.length > 0 ? possibleCookies : [""]
+  };
 }
 
 async function fetchInitialChannelList() {
   var channelsMap = {};
-  var syncLists = [
-    COOKIE_SOURCES.sayan, 
-    COOKIE_SOURCES.binge, 
-    COOKIE_SOURCES.fallback1,
-    COOKIE_SOURCES.fallback2,
-    MY_MAIN_JSON
-  ];
-
+  var syncLists = [COOKIE_SOURCES.sayan, COOKIE_SOURCES.binge, MY_MAIN_JSON];
   for (var i = 0; i < syncLists.length; i++) {
     try {
-      if (!syncLists[i] || syncLists[i].startsWith("YOUR_")) continue;
       var res = await fetch(syncLists[i]);
       if (res.ok) {
         var data = await res.json();
-        var arr = parseDataToArray(data);
-        
+        var arr = Array.isArray(data) ? data : (data.channels || data.result || []);
         arr.forEach(function(c) {
           var id = String(c.id || c.channel_id || c.k_id || "");
           var name = c.name || c.title || c.channel_name || ("Channel " + id);
@@ -759,7 +713,6 @@ function showErrorMsg(msg) {
   showStatus(msg, "err", 0);
 }
 
-// Fixed operator syntax safely for parser
 function shakaErrStr(err) {
   if (!err) return "Unknown error";
   var cats = { 1: "Network", 2: "Text", 3: "Media", 4: "Manifest", 5: "Streaming", 6: "DRM", 7: "Player" };
@@ -1053,37 +1006,6 @@ function setupSwipeGestures(targetFrame, video) {
   });
 }
 
-function buildConfigObj(cfg) {
-  var baseCfg = {
-    manifest: {
-      defaultPresentationDelay: 3, 
-      ignoreTextStreamFailures: true,
-      retryParameters: { maxAttempts: 5, baseDelay: 800, backoffFactor: 1.3, fuzzFactor: 0.1 }
-    },
-    streaming: {
-      lowLatencyMode:              false,
-      bufferingGoal:               5,  
-      rebufferingGoal:             1.2,
-      safeSeekOffset:              3,
-      stallEnabled:                true,
-      stallThreshold:              1,
-      stallSkip:                   0.5,
-      inaccurateManifestTolerance: 0,
-      retryParameters: { maxAttempts: 5, baseDelay: 800, backoffFactor: 1.3, fuzzFactor: 0.1 }
-    },
-    abr: {
-      enabled: true,
-      defaultBandwidthEstimate: 250000, 
-      switchInterval: 2,
-      restrictions: { maxHeight: 1080 }
-    }
-  };
-  if (cfg.keyId && cfg.key) {
-    baseCfg.drm = { clearKeys: { [cfg.keyId]: cfg.key } };
-  }
-  return baseCfg;
-}
-
 async function startPlayer(ch) {
   pcEl.style.display = "flex";
   listEl.style.display = "none";
@@ -1102,9 +1024,9 @@ async function startPlayer(ch) {
   }
 
   setLoadMsg("Fetching structural cookies...");
-  var masterConfigs = await buildPlayerConfigs(ch.id);
-  if (!masterConfigs || masterConfigs.length === 0) {
-    showErrorMsg("Error: Channel pipeline not resolved across any JSON!");
+  var masterConfig = await buildPlayerConfigs(ch.id);
+  if (!masterConfig || !masterConfig.url) {
+    showErrorMsg("Error: Channel pipeline not resolved!");
     return;
   }
 
@@ -1124,60 +1046,87 @@ async function startPlayer(ch) {
     setupSwipeGestures(pcEl, vidEl);
   }, 150);
 
+  function buildConfigObj(cfg) {
+    var baseCfg = {
+      manifest: {
+        defaultPresentationDelay: 3, 
+        ignoreTextStreamFailures: true,
+        retryParameters: { maxAttempts: 5, baseDelay: 800, backoffFactor: 1.3, fuzzFactor: 0.1 }
+      },
+      streaming: {
+        lowLatencyMode:              false,
+        bufferingGoal:               5,  
+        rebufferingGoal:             1.2,
+        safeSeekOffset:              3,
+        stallEnabled:                true,
+        stallThreshold:              1,
+        stallSkip:                   0.5,
+        inaccurateManifestTolerance: 0,
+        retryParameters: { maxAttempts: 5, baseDelay: 800, backoffFactor: 1.3, fuzzFactor: 0.1 }
+      },
+      abr: {
+        enabled: true,
+        defaultBandwidthEstimate: 250000, 
+        switchInterval: 2,
+        restrictions: { maxHeight: 1080 }
+      }
+    };
+    if (cfg.keyId && cfg.key) {
+      baseCfg.drm = { clearKeys: { [cfg.keyId]: cfg.key } };
+    }
+    return baseCfg;
+  }
+
   var isPlayed = false;
 
-  // LOOP 1: Iterate over different JSON cluster sources
-  for (var srcIdx = 0; srcIdx < masterConfigs.length; srcIdx++) {
-    var currentCfg = masterConfigs[srcIdx];
-    
-    // LOOP 2: Iterate over the specific cookies of this configuration variation
-    for (var i = 0; i < currentCfg.cookies.length; i++) {
-      var activeCookie = currentCfg.cookies[i];
-      var activeRaw = extractRawCookie(activeCookie);
-      showStatus("Connecting Source " + (srcIdx + 1) + " (Node " + (i + 1) + ")...", "warn", 1500);
+  for (var i = 0; i < masterConfig.cookies.length; i++) {
+    var activeCookie = masterConfig.cookies[i];
+    var activeRaw = extractRawCookie(activeCookie);
+    showStatus("Connecting Node " + (i + 1) + "...", "warn", 1500);
 
-      player.configure(buildConfigObj(currentCfg));
-      player.getNetworkingEngine().clearAllRequestFilters();
-      player.getNetworkingEngine().registerRequestFilter(function (type, req) {
-        req.headers["Referer"]    = "https://www.jiotv.com/";
-        req.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
-        if (activeCookie) req.headers["Cookie"] = activeCookie;
-        if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
-          if (activeRaw) req.uris = req.uris.map(function (u) { return appendCookieToUri(u, activeRaw); });
-        }
-      });
-
-      try {
-        setLoadMsg("Spawning pipeline branch from cluster " + (srcIdx + 1) + "...");
-        await player.load(currentCfg.url);
-        vidEl.play().then(function() {
-          showStatus("Live Connected!", "ok", 4000);
-        }).catch(function () {
-          console.log("Autoplay blocked, waiting for Tap gate.");
-        });
-        isPlayed = true;
-        hideOverlay();
-        break; 
-      } catch (e) {
-        console.warn("Source branch " + (srcIdx + 1) + " node fail. Rotating path...");
+    player.configure(buildConfigObj(masterConfig));
+    player.getNetworkingEngine().clearAllRequestFilters();
+    player.getNetworkingEngine().registerRequestFilter(function (type, req) {
+      req.headers["Referer"]    = "https://www.jiotv.com/";
+      req.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+      if (activeCookie) req.headers["Cookie"] = activeCookie;
+      if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+        if (activeRaw) req.uris = req.uris.map(function (u) { return appendCookieToUri(u, activeRaw); });
       }
+    });
+
+    try {
+      setLoadMsg("Spawning stream pipeline...");
+      await player.load(masterConfig.url);
+      vidEl.play().then(function() {
+        showStatus("Live Connected!", "ok", 4000);
+      }).catch(function () {
+        console.log("Autoplay blocked, waiting for Tap gate.");
+      });
+      isPlayed = true;
+      hideOverlay();
+      break;
+    } catch (e) {
+      console.warn("Branch node " + (i + 1) + " failed to bind.", e);
     }
-    
-    if (isPlayed) break; 
   }
 
   if (!isPlayed) {
     hideOverlay();
-    showStatus("All JSON Pipeline Failures: Verification Failed!", "err", 0);
+    showStatus("Playback Error: Verification Failed!", "err", 0);
     return;
   }
 
+  // ==========================================
+  // CLICK PLAY / UNMUTE TRIGGER WITH 2s DELAY POPUP
+  // ==========================================
   tapGate.className = ""; 
   tapGate.addEventListener("click", function () {
     tapGate.classList.add("hidden");
     vidEl.muted = false; 
     if (vidEl.paused) vidEl.play().catch(function () {});
 
+    // ठीक 2 सेकंड के बाद पॉपअप शो होगा
     setTimeout(function() {
       var waPopup = document.getElementById('waPopup');
       if (waPopup) waPopup.classList.add('show');
@@ -1214,38 +1163,25 @@ async function startPlayer(ch) {
     refreshCount++;
     showStatus("Refreshing cluster...", "warn", 0);
     try {
-      var freshConfigs = await buildPlayerConfigs(ch.id);
-      if (!freshConfigs || freshConfigs.length === 0) throw new Error();
-      
-      var anyPlayed = false;
-      for (var sIdx = 0; sIdx < freshConfigs.length; sIdx++) {
-        var currentCfg = freshConfigs[sIdx];
-        var targetCookie = currentCfg.cookies[0] || "";
-        var targetRaw = extractRawCookie(targetCookie);
+      var freshConfig = await buildPlayerConfigs(ch.id);
+      if (!freshConfig || !freshConfig.url) throw new Error();
+      masterConfig = freshConfig;
+      var targetCookie = masterConfig.cookies[0] || "";
+      var targetRaw = extractRawCookie(targetCookie);
 
-        player.configure(buildConfigObj(currentCfg));
-        player.getNetworkingEngine().clearAllRequestFilters();
-        player.getNetworkingEngine().registerRequestFilter(function (type, req) {
-          req.headers["Referer"]    = "https://www.jiotv.com/";
-          req.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
-          if (targetCookie) req.headers["Cookie"] = targetCookie;
-          if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
-            if (targetRaw) req.uris = req.uris.map(function (u) { return appendCookieToUri(u, targetRaw); });
-          }
-        });
-
-        try {
-          await player.load(currentCfg.url);
-          vidEl.play().catch(function () {});
-          anyPlayed = true;
-          break;
-        } catch(err) {
-          console.warn("Reload path failure for source index " + sIdx);
+      player.configure(buildConfigObj(masterConfig));
+      player.getNetworkingEngine().clearAllRequestFilters();
+      player.getNetworkingEngine().registerRequestFilter(function (type, req) {
+        req.headers["Referer"]    = "https://www.jiotv.com/";
+        req.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
+        if (targetCookie) req.headers["Cookie"] = targetCookie;
+        if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+          if (targetRaw) req.uris = req.uris.map(function (u) { return appendCookieToUri(u, targetRaw); });
         }
-      }
+      });
 
-      if (!anyPlayed) throw new Error();
-
+      await player.load(masterConfig.url);
+      vidEl.play().catch(function () {});
       refreshCount  = 0;
       liveEdgeTried = false;
       showStatus("Live Restored", "ok", 4000);
@@ -1267,7 +1203,6 @@ async function startPlayer(ch) {
     }
   });
 
-  var stallTimeoutValue = 4000;
   function onStall() {
     if (stallTimer || isRefreshing) return;
     showStatus("Buffering...", "warn", 0);
@@ -1275,7 +1210,7 @@ async function startPlayer(ch) {
       stallTimer = null;
       if (!liveEdgeTried) tryLiveEdgeRecovery();
       else refreshAndReload();
-    }, stallTimeoutValue); 
+    }, 4000); 
   }
 
   function onPlaying() {
@@ -1296,6 +1231,7 @@ async function startPlayer(ch) {
 }
 
 async function main() {
+  // पॉपअप क्लोज करने वाले बटन्स का बाइंडिंग
   var pX = document.getElementById('popupX');
   var pJ = document.getElementById('popupJoin');
   var pA = document.getElementById('popupAlready');
