@@ -1,9 +1,13 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="referrer" content="no-referrer">
 <title>Sports Live</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css">
+<!-- Google Chromecast SDK -->
+<script defer src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -14,13 +18,21 @@ html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;font-family:
 #overlay p{color:#666;font-size:13px;letter-spacing:.4px;text-align:center;padding:0 20px;font-weight:500}
 
 #channel-list{position:fixed;inset:0;background:#0a0a0a;z-index:9998;display:none;flex-direction:column;overflow-y:auto;padding:24px 16px}
-#channel-list h1{color:#fff;font-size:16px;font-weight:600;letter-spacing:.5px;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #141414;text-align:center}
+#channel-list h1{color:#fff;font-size:16px;font-weight:600;letter-spacing:.5px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #141414;text-align:center}
+
+/* Search Bar Styles */
+#search-container {width:100%;max-width:400px;margin:0 auto 16px auto;}
+#ch-search {width:100%;padding:10px 14px;background:#141417;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:13px;outline:none;transition:border-color .2s}
+#ch-search:focus {border-color:#38bdf8}
+
 #ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
-.ch-card{background:#111;border:1px solid #1a1a1a;border-radius:10px;padding:12px 10px;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;transition:background .2s,border-color .2s,transform .15s;-webkit-tap-highlight-color:transparent}
+.ch-card{position:relative;background:#111;border:1px solid #1a1a1a;border-radius:10px;padding:12px 10px;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;transition:background .2s,border-color .2s,transform .15s;-webkit-tap-highlight-color:transparent}
 .ch-card:hover{background:#161616;border-color:#262626}
 .ch-card:active{transform:scale(.97);background:#1a1a1a}
 .ch-card img{width:56px;height:56px;border-radius:50%;object-fit:cover;background:#1a1a1a;border:1px solid #222}
 .ch-card span{color:#e5e5e5;font-size:12px;font-weight:500;line-height:1.4}
+.ch-fav-star{position:absolute;top:6px;right:8px;font-size:14px;color:#555;cursor:pointer;transition:color .2s}
+.ch-fav-star.active{color:#ffcc00}
 
 #pc{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;background:#000!important;display:none;z-index:9990!important;align-items:center;justify-content:center;touch-action:manipulation}
 .shaka-video-container {width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;position:relative!important}
@@ -80,15 +92,115 @@ video.mode-cover{object-fit:cover!important}
 #status.warn{color:#fb923c}
 #status.err{color:#f87171}
 
-.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .custom-q-trigger-btn{background:transparent!important;border:none!important;cursor:pointer!important;padding:0 7px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s}
-.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .custom-q-trigger-btn:hover{opacity:1}
-.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .custom-q-trigger-btn svg{width:18px;height:18px;display:block}
+.shaka-controls-button-panel {
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+}
+.shaka-controls-button-panel::-webkit-scrollbar {
+  display: none !important;
+}
+
+.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-custom-fs-btn, .custom-q-trigger-btn{background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;}
+.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-custom-fs-btn:hover, .custom-q-trigger-btn:hover{opacity:1}
+.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-custom-fs-btn svg, .custom-q-trigger-btn svg{width:18px;height:18px;display:block}
 .shaka-wa-btn svg{fill:#25D366}
 .shaka-lock-btn svg{fill:#ffffff}
 .shaka-timer-btn svg{fill:#ffcc00}
 .shaka-speed-btn svg{fill:#38bdf8}
 .shaka-eq-btn svg{fill:#a855f7}
-.custom-q-trigger-btn svg{fill:#ffffff}
+.shaka-stats-btn svg{fill:#f43f5e}
+.shaka-chat-btn svg{fill:#38bdf8}
+.shaka-custom-fs-btn svg{fill:#38bdf8}
+.shaka-pip-btn svg, .custom-q-trigger-btn svg{fill:#ffffff}
+
+/* STATS FOR NERDS OVERLAY */
+#stats-hud {
+  position: absolute;
+  top: 50px;
+  left: 14px;
+  z-index: 10002;
+  background: rgba(10, 10, 14, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #00f0ff;
+  font-family: monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  display: none;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.8);
+  max-width: 280px;
+}
+#stats-hud h3 { font-size: 12px; color: #fff; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
+
+/* LIVE CHAT OVERLAY */
+#live-chat-panel {
+  position: absolute;
+  top: 50px;
+  right: 14px;
+  bottom: 80px;
+  width: 260px;
+  z-index: 10001;
+  background: rgba(15, 15, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  display: none;
+  flex-direction: column;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.8);
+  overflow: hidden;
+}
+#chat-header {
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#chat-header span { color: #38bdf8; font-size: 10px; }
+#chat-messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 11px;
+}
+.chat-msg { color: #e2e8f0; line-height: 1.3; word-break: break-word; }
+.chat-user { font-weight: 700; color: #38bdf8; margin-right: 4px; }
+#chat-input-box {
+  display: flex;
+  padding: 8px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.4);
+}
+#chat-input {
+  flex: 1;
+  background: #1e1e24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: #fff;
+  font-size: 11px;
+  outline: none;
+}
+#chat-send {
+  background: #38bdf8;
+  border: none;
+  color: #000;
+  font-weight: bold;
+  padding: 0 10px;
+  margin-left: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 11px;
+}
 
 #brightness-overlay {position:absolute;inset:0;background:black;opacity:0;pointer-events:none;z-index:99}
 #gesture-indicator {
@@ -109,6 +221,7 @@ video.mode-cover{object-fit:cover!important}
   box-shadow:0 4px 10px rgba(0,0,0,0.5);
 }
 
+/* AUTO-HIDING FLOATING LOCK BUTTON STYLES */
 #floating-lock-btn {
   position: absolute;
   left: 20px;
@@ -120,10 +233,17 @@ video.mode-cover{object-fit:cover!important}
   background: rgba(0,0,0,0.7);
   border: 1.5px solid rgba(255,255,255,0.4);
   border-radius: 50%;
-  display: none;
+  display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+#floating-lock-btn.show {
+  opacity: 1;
+  pointer-events: auto;
 }
 #floating-lock-btn svg { width: 22px; height: 22px; fill: #f87171; }
 
@@ -189,11 +309,39 @@ video.mode-cover{object-fit:cover!important}
   margin-left: 8px;
 }
 
-.shaka-overflow-menu, .shaka-resolution-button { display: none !important; }
+.shaka-overflow-menu, .shaka-resolution-button, .shaka-fullscreen-button { display: none !important; }
 
-/* ==========================================
-   WHATSAPP POPUP STYLES
-   ========================================== */
+/* IN-PLAYER SWITCHER STYLES */
+.custom-feed-switcher {
+  background: rgba(24, 24, 28, 0.88) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  padding: 5px 8px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+  outline: none !important;
+  cursor: pointer !important;
+  margin: 0 4px !important;
+  max-width: 120px !important;
+  font-family: inherit !important;
+  height: 28px !important;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  transition: border-color 0.2s, background 0.2s;
+  flex-shrink: 0 !important;
+}
+.custom-feed-switcher:hover {
+  border-color: #38bdf8 !important;
+  background: rgba(30, 30, 35, 0.95) !important;
+}
+.custom-feed-switcher option {
+  background: #12131a !important;
+  color: #e5e5e5 !important;
+  padding: 8px !important;
+}
+
+/* WHATSAPP POPUP STYLES */
 .rgb-popup-overlay{
   position:fixed;
   inset:0;
@@ -201,7 +349,7 @@ video.mode-cover{object-fit:cover!important}
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:21000 !important; /* Shaka UI Controls से ऊपर रखने के लिए */
+  z-index:21000 !important; 
   opacity:0;
   pointer-events:none;
   transition:opacity .3s ease;
@@ -291,7 +439,6 @@ video.mode-cover{object-fit:cover!important}
 <style type="text/css">* {user-select: auto !important; -webkit-user-select: auto !important;}</style></head>
 <body>
 
-<!-- Dynamic WhatsApp PopUp Structural Node Layer -->
 <div class="rgb-popup-overlay" id="waPopup">
   <div class="rgb-popup-box">
     <div class="rgb-close-btn" id="popupX">✖</div>
@@ -316,10 +463,33 @@ video.mode-cover{object-fit:cover!important}
 
 <div id="channel-list">
   <h1>Sports Live</h1>
+  <div id="search-container">
+    <input type="text" id="ch-search" placeholder="🔍 Search channel name...">
+  </div>
   <div id="ch-grid"></div>
 </div>
 
 <div id="pc">
+  <!-- STATS FOR NERDS HUD -->
+  <div id="stats-hud">
+    <h3>📊 Stats for Nerds</h3>
+    <div>Viewport: <span id="st-res">0x0</span></div>
+    <div>Speed: <span id="st-bw">0 Mbps</span></div>
+    <div>Buffer: <span id="st-buf">0s</span></div>
+    <div>Codecs: <span id="st-codec">-</span></div>
+    <div>Dropped Frames: <span id="st-drop">0</span></div>
+  </div>
+
+  <!-- LIVE CHAT PANEL -->
+  <div id="live-chat-panel">
+    <div id="chat-header">Live Chat <span>• Public</span></div>
+    <div id="chat-messages"></div>
+    <div id="chat-input-box">
+      <input type="text" id="chat-input" placeholder="Say something...">
+      <button id="chat-send">Send</button>
+    </div>
+  </div>
+
   <img alt="Channel Brand Logo" class="channel-logo-overlay" src="https://res.cloudinary.com/dgktl7phy/image/upload/f_auto,q_auto/1001220368_dpkmgi">
   <div id="brightness-overlay"></div>
   <div id="gesture-indicator"></div>
@@ -378,6 +548,7 @@ var brOverlay = document.getElementById("brightness-overlay");
 var gestureHud = document.getElementById("gesture-indicator");
 var currentBrightness = 100;
 var isInterfaceLocked = false;
+var lockHideTimer = null;
 
 var audioCtx = null;
 var gainNode = null;
@@ -394,6 +565,7 @@ var globalPlayer = null;
 var globalUi = null;
 var sleepTimeout = null;
 var cachedChannels = [];
+var statsInterval = null;
 
 var FIT_MODES = ["contain", "fill", "cover"];
 var FIT_ICONS = {
@@ -401,6 +573,13 @@ var FIT_ICONS = {
   fill:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>',
   cover:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M6 7l3 3m0 0H7m2 0V8m9-1l-3 3m0 0h2m-2 0V8M6 13l3-3m0 0H7m2 0v2m9 1l-3-3m0 0h2m-2 0v2"/></svg>'
 };
+
+function fetchWithTimeout(url, timeoutMs) {
+  timeoutMs = timeoutMs || 4000;
+  var controller = new AbortController();
+  var timer = setTimeout(function() { controller.abort(); }, timeoutMs);
+  return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
+}
 
 function showStatus(msg, type, dur) {
   statusEl.textContent = msg;
@@ -449,10 +628,89 @@ function appendCookieToUri(uri, rawCookie) {
   return uri + (uri.indexOf("?") !== -1 ? "&" : "?") + "__hdnea__=" + rawCookie;
 }
 
-// POPUP CLOSE MANAGER
 function closePopup(){
   var waPopup = document.getElementById('waPopup');
   if (waPopup) waPopup.classList.remove('show');
+
+  var videoContainer = document.getElementById('pc');
+  if (videoContainer) {
+    if (videoContainer.requestFullscreen) {
+        videoContainer.requestFullscreen().then(function() {
+          enforceAutoLandscape();
+        }).catch(function(){});
+    } else if (videoContainer.webkitRequestFullscreen) {
+        videoContainer.webkitRequestFullscreen();
+        enforceAutoLandscape();
+    }
+  }
+}
+
+async function enforceAutoLandscape() {
+  try {
+    if (screen.orientation && screen.orientation.lock) {
+      await screen.orientation.lock("landscape").catch(function(e) {
+        console.log("Orientation lock bypassed/unsupported:", e);
+      });
+    }
+  } catch (err) {}
+}
+
+/* ==========================================
+   LOCK BUTTON AUTO-HIDE LOGIC
+   ========================================== */
+function showFloatingLockTemp() {
+  floatLock.classList.add("show");
+  if (lockHideTimer) clearTimeout(lockHideTimer);
+  lockHideTimer = setTimeout(function() {
+    floatLock.classList.remove("show");
+  }, 3000);
+}
+
+/* ==========================================
+   SIMULATED LIVE CHAT LOGIC
+   ========================================== */
+function initLiveChat() {
+  var chatBox = document.getElementById("chat-messages");
+  var input = document.getElementById("chat-input");
+  var sendBtn = document.getElementById("chat-send");
+  if (!chatBox) return;
+
+  var botComments = [
+    { name: "Rahul_07", text: "What a shot!! 🔥" },
+    { name: "CricketFanatic", text: "Quality is super clear today 👌" },
+    { name: "Amit_VK", text: "Come on India! 🇮🇳" },
+    { name: "SkyWalker", text: "Sixer 💥💥" },
+    { name: "Rohan_S", text: "No lag at all, smooth stream" },
+    { name: "ProViewer", text: "Great match commentary!" }
+  ];
+
+  function addMessage(user, msg) {
+    var div = document.createElement("div");
+    div.className = "chat-msg";
+    div.innerHTML = '<span class="chat-user">' + user + ':</span> ' + msg;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    if (chatBox.children.length > 30) chatBox.removeChild(chatBox.firstChild);
+  }
+
+  setInterval(function() {
+    var chatPanel = document.getElementById("live-chat-panel");
+    if (chatPanel && chatPanel.style.display === "flex") {
+      var randomItem = botComments[Math.floor(Math.random() * botComments.length)];
+      addMessage(randomItem.name, randomItem.text);
+    }
+  }, 3500);
+
+  if (sendBtn && input) {
+    sendBtn.onclick = function() {
+      var val = input.value.trim();
+      if (val) {
+        addMessage("You", val);
+        input.value = "";
+      }
+    };
+    input.onkeydown = function(e) { if (e.key === "Enter") sendBtn.click(); };
+  }
 }
 
 async function buildPlayerConfigs(targetId) {
@@ -461,11 +719,14 @@ async function buildPlayerConfigs(targetId) {
   var possibleCookies = [];
 
   var mappingSources = [MY_MAIN_JSON, COOKIE_SOURCES.sayan, COOKIE_SOURCES.binge];
-  for (var i = 0; i < mappingSources.length; i++) {
-    try {
-      var res = await fetch(mappingSources[i]);
-      if (!res.ok) continue;
-      var data = await res.json();
+
+  var mapResults = await Promise.allSettled(
+    mappingSources.map(url => fetchWithTimeout(url, 4000).then(r => r.ok ? r.json() : null).catch(() => null))
+  );
+
+  for (var i = 0; i < mapResults.length; i++) {
+    if (mapResults[i].status === 'fulfilled' && mapResults[i].value) {
+      var data = mapResults[i].value;
       var arr = Array.isArray(data) ? data : (data.channels || data.result || []);
       var found = arr.find(function(c) {
         return String(c.id) === String(targetId) || String(c.channel_id) === String(targetId) || String(c.k_id) === String(targetId);
@@ -485,7 +746,7 @@ async function buildPlayerConfigs(targetId) {
         if (tk) possibleCookies.push(tk);
         break;
       }
-    } catch(e){}
+    }
   }
 
   if (!baseStreamInfo || !baseStreamInfo.url) return null;
@@ -493,58 +754,31 @@ async function buildPlayerConfigs(targetId) {
   var streamUrl = baseStreamInfo.url;
   var myPath = getUrlBasePath(streamUrl);
 
-  if (streamUrl.includes("jiotvmb") || streamUrl.includes("mb")) {
-    try {
-      var mbRes = await fetch(COOKIE_SOURCES.mb);
-      if (mbRes.ok) {
-        var mbData = await mbRes.json();
-        if (Array.isArray(mbData) && mbData.length > 1) {
-          var tk = extractToken(mbData[1]);
-          if (tk) possibleCookies.push(tk);
-        } else {
-          var tk = extractToken(mbData);
-          if (tk) possibleCookies.push(tk);
-        }
-      }
-    } catch(e){}
-  } else {
-    try {
-      var plRes = await fetch(COOKIE_SOURCES.pl);
-      if (plRes.ok) {
-        var plData = await plRes.json();
-        var plChans = [].concat(plData.successful_results || [], plData.failed_results || []);
-        var matched = plChans.find(function(c) {
-          if (String(c.channel_id) === String(targetId)) return true;
-          var u = c.error_details ? c.error_details.final_url : (c.url || "");
-          return u && getUrlBasePath(u) === myPath;
-        });
-        if (matched) {
-          var u = matched.error_details ? matched.error_details.final_url : (matched.url || "");
-          var tk = extractToken(matched, u);
-          if (tk) possibleCookies.push(tk);
-        }
-      }
-    } catch(e){}
-  }
+  var isMb = streamUrl.includes("jiotvmb") || streamUrl.includes("mb");
+  var cookieReqs = [
+    fetchWithTimeout(isMb ? COOKIE_SOURCES.mb : COOKIE_SOURCES.pl, 3500).then(r => r.ok ? r.json() : null).catch(() => null),
+    fetchWithTimeout(COOKIE_SOURCES.sayan, 3500).then(r => r.ok ? r.json() : null).catch(() => null),
+    fetchWithTimeout(COOKIE_SOURCES.binge, 3500).then(r => r.ok ? r.json() : null).catch(() => null)
+  ];
 
-  var poolFallbacks = [COOKIE_SOURCES.sayan, COOKIE_SOURCES.binge];
-  for (var j = 0; j < poolFallbacks.length; j++) {
-    try {
-      var res = await fetch(poolFallbacks[j]);
-      if (!res.ok) continue;
-      var data = await res.json();
-      var arr = Array.isArray(data) ? data : (data.channels || data.result || []);
-      var matched = arr.find(function(c) {
-        var u = c.url || c.stream_url || c.channel_url || c.k_url || "";
+  var cookieResults = await Promise.allSettled(cookieReqs);
+
+  cookieResults.forEach(res => {
+    if (res.status === 'fulfilled' && res.value) {
+      var data = res.value;
+      var plChans = Array.isArray(data) ? data : [].concat(data.successful_results || [], data.failed_results || [], data.channels || []);
+      var matched = plChans.find(function(c) {
+        if (String(c.channel_id) === String(targetId) || String(c.id) === String(targetId)) return true;
+        var u = c.error_details ? c.error_details.final_url : (c.url || c.stream_url || "");
         return u && getUrlBasePath(u) === myPath;
       });
       if (matched) {
-        var u = matched.url || matched.stream_url || "";
+        var u = matched.error_details ? matched.error_details.final_url : (matched.url || matched.stream_url || "");
         var tk = extractToken(matched, u);
         if (tk && possibleCookies.indexOf(tk) === -1) possibleCookies.push(tk);
       }
-    } catch(e){}
-  }
+    }
+  });
 
   return {
     url: streamUrl,
@@ -555,36 +789,41 @@ async function buildPlayerConfigs(targetId) {
 }
 
 async function fetchInitialChannelList() {
-  var channelsMap = {};
-  var syncLists = [COOKIE_SOURCES.sayan, COOKIE_SOURCES.binge, MY_MAIN_JSON];
-  for (var i = 0; i < syncLists.length; i++) {
+  var cachedData = sessionStorage.getItem("app_cached_channels");
+  if (cachedData) {
     try {
-      var res = await fetch(syncLists[i]);
-      if (res.ok) {
-        var data = await res.json();
-        var arr = Array.isArray(data) ? data : (data.channels || data.result || []);
-        arr.forEach(function(c) {
-          var id = String(c.id || c.channel_id || c.k_id || "");
-          var name = c.name || c.title || c.channel_name || ("Channel " + id);
-          if (id) {
-            channelsMap[id] = { id: id, name: name, logo: CUSTOM_LOGO };
-          }
-        });
-      }
+      var parsed = JSON.parse(cachedData);
+      if (parsed && parsed.length > 0) return parsed;
     } catch(e){}
   }
+
+  var channelsMap = {};
+  var syncLists = [COOKIE_SOURCES.sayan, COOKIE_SOURCES.binge, MY_MAIN_JSON];
+
+  var results = await Promise.allSettled(
+    syncLists.map(url => fetchWithTimeout(url, 4000).then(r => r.ok ? r.json() : null).catch(() => null))
+  );
+
+  results.forEach(res => {
+    if (res.status === 'fulfilled' && res.value) {
+      var data = res.value;
+      var arr = Array.isArray(data) ? data : (data.channels || data.result || []);
+      arr.forEach(function(c) {
+        var id = String(c.id || c.channel_id || c.k_id || "");
+        var name = c.name || c.title || c.channel_name || ("Channel " + id);
+        if (id) {
+          channelsMap[id] = { id: id, name: name, logo: CUSTOM_LOGO };
+        }
+      });
+    }
+  });
+
   var list = [];
   for (var key in channelsMap) { list.push(channelsMap[key]); }
   if (list.length === 0) throw new Error("Empty pool");
-  return list;
-}
 
-async function enforceAutoLandscape() {
-  try {
-    if (screen.orientation && screen.orientation.lock) {
-      await screen.orientation.lock("landscape").catch(e => console.log("Orientation bypass"));
-    }
-  } catch (err) {}
+  try { sessionStorage.setItem("app_cached_channels", JSON.stringify(list)); } catch(e){}
+  return list;
 }
 
 function initializeAudioEngine(video) {
@@ -604,7 +843,8 @@ function initializeAudioEngine(video) {
     midFilter.Q.value = 1.0;
     midFilter.frequency.value = 1000;
 
-    trebleFilter = audioCtx.createBiquadFilter();
+    trebleFilter = document.createElement ? audioCtx.createBiquadFilter() : null;
+    if(!trebleFilter) trebleFilter = audioCtx.createBiquadFilter();
     trebleFilter.type = "highshelf";
     trebleFilter.frequency.value = 3000;
 
@@ -646,16 +886,48 @@ function setBoostedVolume(level) {
   }
 }
 
+function getFavorites() {
+  try {
+    return JSON.parse(localStorage.getItem("fav_channels") || "[]");
+  } catch(e) { return []; }
+}
+
+function toggleFavorite(id) {
+  var favs = getFavorites();
+  var idx = favs.indexOf(id);
+  if (idx === -1) favs.push(id);
+  else favs.splice(idx, 1);
+  localStorage.setItem("fav_channels", JSON.stringify(favs));
+}
+
 function showChannelList(channels) {
   hideOverlay();
   pcEl.style.display = "none";
   var fragment = document.createDocumentFragment();
-  channels.forEach(function (ch) {
+  var favs = getFavorites();
+
+  var sortedChannels = channels.slice().sort((a, b) => {
+    var aFav = favs.includes(a.id) ? 1 : 0;
+    var bFav = favs.includes(b.id) ? 1 : 0;
+    return bFav - aFav;
+  });
+
+  sortedChannels.forEach(function (ch) {
     var a = document.createElement("a");
     a.className = "ch-card";
     a.href = "?id=" + encodeURIComponent(ch.id);
-    a.innerHTML = "<img src='" + CUSTOM_LOGO + "'><span>" + ch.name + "</span>";
+
+    var isFav = favs.includes(ch.id);
+    a.innerHTML = '<span class="ch-fav-star ' + (isFav ? 'active' : '') + '">★</span><img src="' + CUSTOM_LOGO + '"><span>' + ch.name + '</span>';
     
+    var star = a.querySelector(".ch-fav-star");
+    star.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleFavorite(ch.id);
+      showChannelList(cachedChannels);
+    });
+
     a.addEventListener("click", async function(e) {
       e.preventDefault();
       var targetUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?id=" + encodeURIComponent(ch.id);
@@ -680,6 +952,19 @@ function showChannelList(channels) {
   gridEl.innerHTML = "";
   gridEl.appendChild(fragment);
   listEl.style.display = "flex";
+
+  var searchInput = document.getElementById("ch-search");
+  if (searchInput) {
+    searchInput.value = "";
+    searchInput.oninput = function(e) {
+      var query = e.target.value.toLowerCase().trim();
+      var cards = gridEl.querySelectorAll(".ch-card");
+      cards.forEach(function(card) {
+        var name = card.querySelector("span:not(.ch-fav-star)").textContent.toLowerCase();
+        card.style.display = name.includes(query) ? "flex" : "none";
+      });
+    };
+  }
 }
 
 async function handleBackNavigation() {
@@ -786,6 +1071,97 @@ function injectCustomControls(container, video, player) {
     controlsContainer.appendChild(wm);
   }
 
+  // IN-PLAYER FEED SWITCHER
+  if (!panel.querySelector(".custom-feed-switcher")) {
+    var switcher = document.createElement("select");
+    switcher.className = "custom-feed-switcher";
+    switcher.title = "Switch Channel Feed";
+
+    var currentId = getChannelId();
+    cachedChannels.forEach(function(ch) {
+      var opt = document.createElement("option");
+      opt.value = ch.id;
+      opt.textContent = ch.name;
+      if (String(ch.id) === String(currentId)) {
+        opt.selected = true;
+      }
+      switcher.appendChild(opt);
+    });
+
+    switcher.addEventListener("change", async function(e) {
+      var selectedId = e.target.value;
+      var targetCh = cachedChannels.find(function(c) { return c.id === selectedId; });
+      if (!targetCh) return;
+
+      var targetUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?id=" + encodeURIComponent(targetCh.id);
+      window.history.pushState({ id: targetCh.id }, '', targetUrl);
+      document.title = targetCh.name;
+
+      if (overlayEl) overlayEl.style.display = "flex";
+      setLoadMsg("Switching feed to: " + targetCh.name + "...");
+
+      if (globalPlayer) {
+        try { await globalPlayer.destroy(); globalPlayer = null; } catch(err) {}
+      }
+      await startPlayer(targetCh);
+    });
+
+    var qBtnAnchor = panel.querySelector(".custom-q-trigger-btn");
+    if (qBtnAnchor) panel.insertBefore(switcher, qBtnAnchor);
+    else panel.appendChild(switcher);
+  }
+
+  // 📊 STATS FOR NERDS BUTTON
+  if (!panel.querySelector(".shaka-stats-btn")) {
+    var statsBtn = document.createElement("button");
+    statsBtn.className = "shaka-stats-btn";
+    statsBtn.title = "Stats for Nerds";
+    statsBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-5h2v5zm4 0h-2v-9h2v9zm4 0h-2v-4h2v4z"/></svg>';
+    
+    statsBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      var hud = document.getElementById("stats-hud");
+      if (!hud) return;
+      var isShowing = hud.style.display === "block";
+      hud.style.display = isShowing ? "none" : "block";
+
+      if (!isShowing) {
+        if (statsInterval) clearInterval(statsInterval);
+        statsInterval = setInterval(function() {
+          if (!player || hud.style.display !== "block") return;
+          var stats = player.getStats();
+          var track = player.getVariantTracks().find(t => t.active);
+          
+          document.getElementById("st-res").textContent = video.videoWidth + "x" + video.videoHeight;
+          document.getElementById("st-bw").textContent = ((stats.bandwidthEstimate || 0) / 1000000).toFixed(2) + " Mbps";
+          document.getElementById("st-buf").textContent = (stats.bufferInfo ? stats.bufferInfo.total : 0).toFixed(1) + "s";
+          document.getElementById("st-codec").textContent = track ? track.codecs : "N/A";
+          document.getElementById("st-drop").textContent = stats.droppedFrames || 0;
+        }, 1000);
+      }
+    });
+    panel.appendChild(statsBtn);
+  }
+
+  // 💬 LIVE CHAT BUTTON
+  if (!panel.querySelector(".shaka-chat-btn")) {
+    var chatBtn = document.createElement("button");
+    chatBtn.className = "shaka-chat-btn";
+    chatBtn.title = "Toggle Live Chat";
+    chatBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>';
+    
+    chatBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      var chatPanel = document.getElementById("live-chat-panel");
+      if (chatPanel) {
+        var isShow = chatPanel.style.display === "flex";
+        chatPanel.style.display = isShow ? "none" : "flex";
+      }
+    });
+    panel.appendChild(chatBtn);
+  }
+
+  // PLAYBACK SPEED BUTTON
   if (!panel.querySelector(".shaka-speed-btn")) {
     var speedBtn = document.createElement("button");
     speedBtn.className = "shaka-speed-btn";
@@ -803,6 +1179,7 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(speedBtn);
   }
 
+  // AUDIO EQUALIZER BUTTON
   if (!panel.querySelector(".shaka-eq-btn")) {
     var eqBtn = document.createElement("button");
     eqBtn.className = "shaka-eq-btn";
@@ -819,6 +1196,7 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(eqBtn);
   }
   
+  // SLEEP TIMER BUTTON
   if (!panel.querySelector(".shaka-timer-btn")) {
     var timerBtn = document.createElement("button");
     timerBtn.className = "shaka-timer-btn";
@@ -840,6 +1218,28 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(timerBtn);
   }
 
+  // PICTURE IN PICTURE BUTTON
+  if (!panel.querySelector(".shaka-pip-btn") && document.pictureInPictureEnabled) {
+    var pipBtn = document.createElement("button");
+    pipBtn.className = "shaka-pip-btn";
+    pipBtn.title = "Picture in Picture Mode";
+    pipBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 11h-8v6h8v-6zm4-8H1c-.55 0-1 .45-1 1v16c0 .55.45 1 1 1h22c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zm-2 16H3V5h18v14z"/></svg>';
+    pipBtn.addEventListener("click", async function(e) {
+      e.stopPropagation();
+      try {
+        if (document.pictureInPictureElement) {
+          await document.exitPictureInPicture();
+        } else {
+          await video.requestPictureInPicture();
+        }
+      } catch (err) {
+        showStatus("PiP Not Supported", "warn", 2000);
+      }
+    });
+    panel.appendChild(pipBtn);
+  }
+
+  // LOCK INTERFACE BUTTON WITH AUTO-HIDE
   if (!panel.querySelector(".shaka-lock-btn")) {
     var lockBtn = document.createElement("button");
     lockBtn.className = "shaka-lock-btn";
@@ -849,21 +1249,31 @@ function injectCustomControls(container, video, player) {
       e.stopPropagation();
       isInterfaceLocked = true;
       pcEl.classList.add("controls-locked");
-      floatLock.style.display = "flex";
+      showFloatingLockTemp();
       qMenuEl.classList.remove("show");
       showStatus("Controls Locked", "warn", 3000);
     });
     panel.appendChild(lockBtn);
   }
 
+  // UNLOCK ACTION
   floatLock.onclick = function(e) {
     e.stopPropagation();
     isInterfaceLocked = false;
     pcEl.classList.remove("controls-locked");
-    floatLock.style.display = "none";
+    floatLock.classList.remove("show");
+    if (lockHideTimer) clearTimeout(lockHideTimer);
     showStatus("Controls Unlocked", "ok", 3000);
   };
 
+  // TAP ON CONTAINER WHEN LOCKED SHOWS LOCK BUTTON FOR 3 SECONDS
+  pcEl.addEventListener("click", function() {
+    if (isInterfaceLocked) {
+      showFloatingLockTemp();
+    }
+  });
+
+  // WHATSAPP BUTTON IN PLAYER
   if (!panel.querySelector(".shaka-wa-btn")) {
     var waBtn = document.createElement("button");
     waBtn.className = "shaka-wa-btn";
@@ -876,31 +1286,29 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(waBtn);
   }
 
+  // QUALITY MENU TRIGGER
   if (!panel.querySelector(".custom-q-trigger-btn")) {
     var qBtn = document.createElement("button");
     qBtn.className = "custom-q-trigger-btn";
     qBtn.title = "Quality Preferences";
-    qBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3-1.57-3-3.5s1.07-3.5 3-3.5 3 1.57 3 3.5-1.07 3.5-3 3.5z"/></svg>';
+    qBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3-1.57-3-3.5s1.07-3.5 3-3.5 3 1.57 3 3.5-1.07 3.5-3 3.5z"/></svg>';
     qBtn.addEventListener("click", function(e) {
       e.stopPropagation();
       if (isInterfaceLocked) return;
       buildYoutubeQualityMenu(player);
       qMenuEl.classList.toggle("show");
     });
-    var fsB = panel.querySelector(".shaka-fullscreen-button");
-    if(fsB) panel.insertBefore(qBtn, fsB);
-    else panel.appendChild(qBtn);
+    panel.appendChild(qBtn);
   }
 
+  // FIT MODE TOGGLE BUTTON
   if (!panel.querySelector(".shaka-fit-btn")) {
     var modeIdx = 0;
     var fitBtn = document.createElement("button");
     fitBtn.className = "shaka-fit-btn";
     fitBtn.title = "Toggle Fit Mode";
     fitBtn.innerHTML = FIT_ICONS.contain;
-    var anchor = panel.querySelector(".shaka-fullscreen-button");
-    if (anchor) panel.insertBefore(fitBtn, anchor);
-    else panel.appendChild(fitBtn);
+    panel.appendChild(fitBtn);
 
     function applyMode(idx) {
       modeIdx = idx;
@@ -919,9 +1327,46 @@ function injectCustomControls(container, video, player) {
     ["fullscreenchange", "webkitfullscreenchange"].forEach(function (ev) {
       document.addEventListener(ev, function () {
         var inFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
-        if (!inFs) applyMode(0);
+        if (inFs) {
+          enforceAutoLandscape();
+        } else {
+          if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+          }
+          applyMode(0);
+        }
       });
     });
+  }
+
+  // CUSTOM FULLSCREEN BUTTON
+  if (!panel.querySelector(".shaka-custom-fs-btn")) {
+    var customFsBtn = document.createElement("button");
+    customFsBtn.className = "shaka-custom-fs-btn";
+    customFsBtn.title = "Toggle Fullscreen";
+    customFsBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>';
+
+    customFsBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      var inFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      if (!inFs) {
+        if (pcEl.requestFullscreen) {
+          pcEl.requestFullscreen().then(function() {
+            enforceAutoLandscape();
+          }).catch(function(){});
+        } else if (pcEl.webkitRequestFullscreen) {
+          pcEl.webkitRequestFullscreen();
+          enforceAutoLandscape();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(function(){});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
+      }
+    });
+    panel.appendChild(customFsBtn);
   }
 
   container.addEventListener("click", function() {
@@ -935,6 +1380,7 @@ function setupSwipeGestures(targetFrame, video) {
   var isSwiping = false;
   var mode = ""; 
   var hudTimeout = null;
+  var lastTapTime = 0;
 
   function showHud(text) {
     gestureHud.textContent = text;
@@ -949,7 +1395,7 @@ function setupSwipeGestures(targetFrame, video) {
     if (isInterfaceLocked) return;
     if (e.touches.length !== 1) return;
     var isControlsActive = targetFrame.querySelector(".shaka-controls-container")?.getAttribute("shown") === "true";
-    if (isControlsActive && e.target.closest(".shaka-controls-button-panel, .shaka-range-container, #custom-q-menu")) return;
+    if (isControlsActive && e.target.closest(".shaka-controls-button-panel, .shaka-range-container, #custom-q-menu, #live-chat-panel")) return;
     
     var touch = e.touches[0];
     startX = touch.clientX;
@@ -1000,18 +1446,69 @@ function setupSwipeGestures(targetFrame, video) {
     }
   }, { passive: true });
 
-  targetFrame.addEventListener("touchend", function() {
+  targetFrame.addEventListener("touchend", function(e) {
+    if (isInterfaceLocked) return;
+    var currentTime = new Date().getTime();
+    var tapInterval = currentTime - lastTapTime;
+    
+    if (tapInterval < 300 && tapInterval > 0 && e.changedTouches && e.changedTouches.length > 0) {
+      var touchX = e.changedTouches[0].clientX;
+      var screenWidth = targetFrame.clientWidth;
+
+      if (touchX > screenWidth / 2) {
+        video.currentTime += 10;
+        showHud("⏩ +10s");
+      } else {
+        video.currentTime -= 10;
+        showHud("⏪ -10s");
+      }
+    }
+    lastTapTime = currentTime;
     isSwiping = false;
     mode = "";
   });
 }
 
+// KEYBOARD SHORTCUTS FOR PC USERS
+document.addEventListener("keydown", function(e) {
+  if (isInterfaceLocked) return;
+  if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
+
+  switch (e.key.toLowerCase()) {
+    case " ":
+    case "k":
+      e.preventDefault();
+      if (vidEl.paused) vidEl.play(); else vidEl.pause();
+      showStatus(vidEl.paused ? "Paused" : "Playing", "ok", 1500);
+      break;
+    case "m":
+      vidEl.muted = !vidEl.muted;
+      showStatus(vidEl.muted ? "Muted 🔇" : "Unmuted 🔊", "ok", 1500);
+      break;
+    case "f":
+      if (!document.fullscreenElement) {
+        pcEl.requestFullscreen().then(function() {
+          enforceAutoLandscape();
+        }).catch(function(){});
+      } else {
+        document.exitFullscreen().catch(function(){});
+      }
+      break;
+    case "arrowright":
+      vidEl.currentTime += 5;
+      showStatus("⏩ +5s", "ok", 1000);
+      break;
+    case "arrowleft":
+      vidEl.currentTime -= 5;
+      showStatus("⏪ -5s", "ok", 1000);
+      break;
+  }
+});
+
 async function startPlayer(ch) {
   pcEl.style.display = "flex";
   listEl.style.display = "none";
   shaka.polyfill.installAll();
-
-  await enforceAutoLandscape();
 
   if (!shaka.Player.isBrowserSupported()) {
     showErrorMsg("Browser not supported.");
@@ -1036,14 +1533,16 @@ async function startPlayer(ch) {
 
   var ui = new shaka.ui.Overlay(player, pcEl, vidEl);
   globalUi = ui;
+
   ui.configure({
-    controlPanelElements: ["play_pause", "mute", "volume", "time_and_duration", "spacer", "fullscreen"],
+    controlPanelElements: ["play_pause", "mute", "volume", "time_and_duration", "spacer", "cast"],
     seekBarColors: { base: "rgba(255,255,255,0.15)", buffered: "rgba(56,189,248,0.4)", played: "#38bdf8" }
   });
 
   setTimeout(function () { 
     injectCustomControls(pcEl, vidEl, player); 
     setupSwipeGestures(pcEl, vidEl);
+    initLiveChat();
   }, 150);
 
   function buildConfigObj(cfg) {
@@ -1117,20 +1616,18 @@ async function startPlayer(ch) {
     return;
   }
 
-  // ==========================================
-  // CLICK PLAY / UNMUTE TRIGGER WITH 2s DELAY POPUP
-  // ==========================================
   tapGate.className = ""; 
   tapGate.addEventListener("click", function () {
     tapGate.classList.add("hidden");
     vidEl.muted = false; 
     if (vidEl.paused) vidEl.play().catch(function () {});
 
-    // ठीक 2 सेकंड के बाद पॉपअप शो होगा
     setTimeout(function() {
       var waPopup = document.getElementById('waPopup');
-      if (waPopup) waPopup.classList.add('show');
-    }, 2000);
+      if (waPopup) {
+        waPopup.classList.add('show');
+      }
+    }, 500);
   }, { once: true });
 
   player.addEventListener("trackschanged", function() {
@@ -1231,7 +1728,6 @@ async function startPlayer(ch) {
 }
 
 async function main() {
-  // पॉपअप क्लोज करने वाले बटन्स का बाइंडिंग
   var pX = document.getElementById('popupX');
   var pJ = document.getElementById('popupJoin');
   var pA = document.getElementById('popupAlready');
@@ -1263,4 +1759,5 @@ async function main() {
 document.addEventListener("DOMContentLoaded", main);
 })();
 </script>
-</body></html>
+</body>
+</html>
