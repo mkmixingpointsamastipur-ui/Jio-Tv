@@ -100,9 +100,9 @@ video.mode-cover{object-fit:cover!important}
   display: none !important;
 }
 
-.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-custom-fs-btn, .custom-q-trigger-btn{background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;}
-.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-custom-fs-btn:hover, .custom-q-trigger-btn:hover{opacity:1}
-.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-custom-fs-btn svg, .custom-q-trigger-btn svg{width:18px;height:18px;display:block}
+.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-share-btn, .shaka-custom-fs-btn, .custom-q-trigger-btn{background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;}
+.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-share-btn:hover, .shaka-custom-fs-btn:hover, .custom-q-trigger-btn:hover{opacity:1}
+.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-share-btn svg, .shaka-custom-fs-btn svg, .custom-q-trigger-btn svg{width:18px;height:18px;display:block}
 .shaka-wa-btn svg{fill:#25D366}
 .shaka-lock-btn svg{fill:#ffffff}
 .shaka-timer-btn svg{fill:#ffcc00}
@@ -110,6 +110,7 @@ video.mode-cover{object-fit:cover!important}
 .shaka-eq-btn svg{fill:#a855f7}
 .shaka-stats-btn svg{fill:#f43f5e}
 .shaka-chat-btn svg{fill:#38bdf8}
+.shaka-share-btn svg{fill:#25D366}
 .shaka-custom-fs-btn svg{fill:#38bdf8}
 .shaka-pip-btn svg, .custom-q-trigger-btn svg{fill:#ffffff}
 
@@ -574,8 +575,16 @@ var FIT_ICONS = {
   cover:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M6 7l3 3m0 0H7m2 0V8m9-1l-3 3m0 0h2m-2 0V8M6 13l3-3m0 0H7m2 0v2m9 1l-3-3m0 0h2m-2 0v2"/></svg>'
 };
 
+// HELPER: Convert Blogger Encoded HTML Entities back to real UTF-8 text
+function decodeHTMLEntities(encodedString) {
+  var txt = document.createElement("textarea");
+  txt.innerHTML = encodedString;
+  return txt.value;
+}
+
+// FAST FETCH WITH REDUCED TIMEOUT (1.8 Seconds max)
 function fetchWithTimeout(url, timeoutMs) {
-  timeoutMs = timeoutMs || 4000;
+  timeoutMs = timeoutMs || 1800;
   var controller = new AbortController();
   var timer = setTimeout(function() { controller.abort(); }, timeoutMs);
   return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
@@ -721,7 +730,7 @@ async function buildPlayerConfigs(targetId) {
   var mappingSources = [MY_MAIN_JSON, COOKIE_SOURCES.sayan, COOKIE_SOURCES.binge];
 
   var mapResults = await Promise.allSettled(
-    mappingSources.map(url => fetchWithTimeout(url, 4000).then(r => r.ok ? r.json() : null).catch(() => null))
+    mappingSources.map(url => fetchWithTimeout(url, 2000).then(r => r.ok ? r.json() : null).catch(() => null))
   );
 
   for (var i = 0; i < mapResults.length; i++) {
@@ -756,9 +765,9 @@ async function buildPlayerConfigs(targetId) {
 
   var isMb = streamUrl.includes("jiotvmb") || streamUrl.includes("mb");
   var cookieReqs = [
-    fetchWithTimeout(isMb ? COOKIE_SOURCES.mb : COOKIE_SOURCES.pl, 3500).then(r => r.ok ? r.json() : null).catch(() => null),
-    fetchWithTimeout(COOKIE_SOURCES.sayan, 3500).then(r => r.ok ? r.json() : null).catch(() => null),
-    fetchWithTimeout(COOKIE_SOURCES.binge, 3500).then(r => r.ok ? r.json() : null).catch(() => null)
+    fetchWithTimeout(isMb ? COOKIE_SOURCES.mb : COOKIE_SOURCES.pl, 2000).then(r => r.ok ? r.json() : null).catch(() => null),
+    fetchWithTimeout(COOKIE_SOURCES.sayan, 2000).then(r => r.ok ? r.json() : null).catch(() => null),
+    fetchWithTimeout(COOKIE_SOURCES.binge, 2000).then(r => r.ok ? r.json() : null).catch(() => null)
   ];
 
   var cookieResults = await Promise.allSettled(cookieReqs);
@@ -801,7 +810,7 @@ async function fetchInitialChannelList() {
   var syncLists = [COOKIE_SOURCES.sayan, COOKIE_SOURCES.binge, MY_MAIN_JSON];
 
   var results = await Promise.allSettled(
-    syncLists.map(url => fetchWithTimeout(url, 4000).then(r => r.ok ? r.json() : null).catch(() => null))
+    syncLists.map(url => fetchWithTimeout(url, 2000).then(r => r.ok ? r.json() : null).catch(() => null))
   );
 
   results.forEach(res => {
@@ -1159,6 +1168,32 @@ function injectCustomControls(container, video, player) {
       }
     });
     panel.appendChild(chatBtn);
+  }
+
+  // 📤 DIRECT SHARE BUTTON (DECODES HTML ENTITIES)
+  if (!panel.querySelector(".shaka-share-btn")) {
+    var shareBtn = document.createElement("button");
+    shareBtn.className = "shaka-share-btn";
+    shareBtn.title = "Share Live Stream";
+    shareBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg>';
+
+    shareBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      var shareTitle = document.title || "Sports Live";
+      var rawMessage = "🔥 *LIVE MATCH STREAMING* 🔥\n\nभाई, यहाँ HD में बिना किसी Ads के लाइव मैच चल रहा है, तू भी देख! 🏏⚽\n\nDirect Link 👇\n" + window.location.href;
+      var shareText = decodeHTMLEntities(rawMessage);
+
+      if (navigator.share) {
+        navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: window.location.href
+        }).catch(function(){});
+      } else {
+        window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(shareText), "_blank");
+      }
+    });
+    panel.appendChild(shareBtn);
   }
 
   // PLAYBACK SPEED BUTTON
@@ -1736,24 +1771,28 @@ async function main() {
   if (pA) pA.onclick = closePopup;
 
   var channelId = getChannelId();
-  try {
-    setLoadMsg("Syncing dynamic cloud catalog...");
-    cachedChannels = await fetchInitialChannelList();
-  } catch (e) {
-    showErrorMsg("Database initialization failure.");
-    return;
+
+  // FAST DIRECT PLAYER STARTUP
+  if (channelId) {
+    var ch = { id: channelId, name: "Live Stream (" + channelId + ")", logo: CUSTOM_LOGO };
+    document.title = ch.name;
+    startPlayer(ch);
+
+    // FETCH CATALOG IN BACKGROUND
+    fetchInitialChannelList().then(function(list) {
+      cachedChannels = list;
+      var found = list.find(function(c) { return c.id === channelId; });
+      if (found) document.title = found.name;
+    }).catch(function(){});
+  } else {
+    try {
+      setLoadMsg("Syncing dynamic cloud catalog...");
+      cachedChannels = await fetchInitialChannelList();
+      showChannelList(cachedChannels);
+    } catch (e) {
+      showErrorMsg("Database initialization failure.");
+    }
   }
-
-  if (!channelId) {
-    showChannelList(cachedChannels);
-    return;
-  }
-
-  var ch = cachedChannels.find(function(c) { return c.id === channelId; });
-  if (!ch) ch = { id: channelId, name: "Live Stream (" + channelId + ")", logo: CUSTOM_LOGO };
-
-  document.title = ch.name;
-  await startPlayer(ch);
 }
 
 document.addEventListener("DOMContentLoaded", main);
