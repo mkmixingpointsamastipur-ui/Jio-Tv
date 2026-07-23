@@ -8,6 +8,34 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css">
 <!-- Google Chromecast SDK -->
 <script defer src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+
+<!-- SECURITY LAYER: Anti-Debugging, Hex Decoding & Dynamic CSS Injection -->
+<script>
+(function() {
+  // 1. Debugger Trap Loop (Anti-DevTools)
+  setInterval(function() {
+    (function() { return false; }).constructor("debugger")();
+  }, 100);
+
+  // 2. Hexadecimal Decoder Function
+  function decodeHex(hexStr) {
+    var str = '';
+    for (var i = 0; i < hexStr.length; i += 2) {
+        str += String.fromCharCode(parseInt(hexStr.substr(i, 2), 16));
+    }
+    return str;
+  }
+
+  // 3. CSS Protection (Hex Encoded #tap-gate CSS)
+  var protectedCSSHex = "237461702d676174657b706f736974696f6e3a6162736f6c7574653b696e7365743a303b7a2d696e6465783a3130313b646973706c61793a666c65783b616c69676e2d6974656d733a63656e7465723b6a7573746966792d636f6e74656e743a63656e7465723b6261636b67726f756e643a7267626128302c302c302c302e36293b637572736f723a706f696e7465723b2d7765626b69742d7461702d686967686c696768742d636f6c6f723a7472616e73706172656e743b6261636b64726f702d66696c7465723a626c757228347078293b2d7765626b69742d6261636b64726f702d66696c7465723a626c757228347078293b7472616e736974696f6e3a6f706163697479202e32357320656173657d237461702d676174652e68696464656e7b646973706c61793a6e6f6e657d237461702d696e6e65727b646973706c61793a666c65783b666c65782d646972656374696f6e3a636f6c756d6e3b616c69676e2d6974656d733a63656e7465723b6761703a313470783b706f696e7465722d6576656e74733a6e6f6e657d237461702d62746e7b77696474683a363870783b6865696768743a363870783b626f726465722d7261646975733a3530253b6261636b67726f756e643a72676261283235352c3235352c3235352c302e3038293b626f726465723a32707820736f6c69642072676261283235352c3235352c3235352c302e36293b646973706c61793a666c65783b616c69676e2d6974656d733a63656e7465723b6a7573746966792d636f6e74656e743a63656e7465723b6261636b64726f702d66696c7465723a626c757228387078293b2d7765626b69742d6261636b64726f702d66696c7465723a626c757228387078293b7472616e736974696f6e3a7472616e73666f726d202e31357320656173652c6261636b67726f756e64202e31357320656173657d237461702d676174653a61637469766520237461702d62746e7b7472616e73666f726d3a7363616c65282e39293b6261636b67726f756e643a72676261283235352c3235352c3235352c302e3138297d237461702d62746e207376677b77696474683a323670783b6865696768743a323670783b6d617267696e2d6c6566743a3370787d237461702d6c6162656c7b636f6c6f723a72676261283235352c3235352c3235352c302e3835293b666f6e742d73697a653a313170783b666f6e742d7765696768743a3630303b6c65747465722d73706163696e673a2e3870783b746578742d736861646f773a302032707820347078207267626128302c302c302c302e38297d";
+  
+  // 4. Dynamic DOM Injection
+  var style = document.createElement('style');
+  style.innerHTML = decodeHex(protectedCSSHex);
+  document.head.appendChild(style);
+})();
+</script>
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -87,14 +115,6 @@ video.mode-cover{object-fit:cover!important}
   top: 20px !important;
   right: 20px !important;
 }
-
-#tap-gate{position:absolute;inset:0;z-index:101;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);cursor:pointer;-webkit-tap-highlight-color:transparent;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);transition:opacity .25s ease}
-#tap-gate.hidden{display:none}
-#tap-inner{display:flex;flex-direction:column;align-items:center;gap:14px;pointer-events:none}
-#tap-btn{width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,0.08);border:2px solid rgba(255,255,255,0.6);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .15s ease,background .15s ease}
-#tap-gate:active #tap-btn{transform:scale(.9);background:rgba(255,255,255,0.18)}
-#tap-btn svg{width:26px;height:26px;margin-left:3px}
-#tap-label{color:rgba(255,255,255,0.85);font-size:11px;font-weight:600;letter-spacing:.8px;text-shadow:0 2px 4px rgba(0,0,0,0.8)}
 
 #status{position:fixed;top:12px;right:12px;z-index:10000!important;padding:6px 12px;background:rgba(10,10,10,0.85);border:1px solid rgba(255,255,255,0.05);font-size:11px;font-weight:500;letter-spacing:.02em;border-radius:20px;pointer-events:none;opacity:0;transition:opacity .3s ease;max-width:260px;text-align:right;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 #status.show{opacity:1}
@@ -507,7 +527,7 @@ video.mode-cover{object-fit:cover!important}
     <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
   </div>
 
-  <video id="v" autoplay="" muted="" playsinline="" webkit-playsinline="" preload="auto" crossorigin="anonymous"></video>
+  <video id="v" autoplay playsinline webkit-playsinline preload="auto" crossorigin="anonymous"></video>
 
   <div id="custom-q-menu">
     <h2>Quality for current video</h2>
@@ -544,44 +564,6 @@ video.mode-cover{object-fit:cover!important}
 (function () {
 "use strict";
 
-// ==========================================
-// HACKER LEVEL SECURITY & ANTI-DEBUGGING
-// ==========================================
-
-// 1. Hexadecimal Encoding & Dynamic DOM Injection for CSS Protection
-(function() {
-    // Hex encoded CSS payload to prevent dragging and element selection invisibly
-    // Decodes to: "*{-webkit-user-drag:none;user-drag:none;} img{pointer-events:none;}"
-    var _0xCssHex = "\x2a\x7b\x2d\x77\x65\x62\x6b\x69\x74\x2d\x75\x73\x65\x72\x2d\x64\x72\x61\x67\x3a\x6e\x6f\x6e\x65\x3b\x75\x73\x65\x72\x2d\x64\x72\x61\x67\x3a\x6e\x6f\x6e\x65\x3b\x7d\x20\x69\x6d\x67\x7b\x70\x6f\x69\x6e\x74\x65\x72\x2d\x65\x76\x65\x6e\x74\x73\x3a\x6e\x6f\x6e\x65\x3b\x7d";
-    var _0xStyle = document.createElement("\x73\x74\x79\x6c\x65");
-    _0xStyle.type = "\x74\x65\x78\x74\x2f\x63\x73\x73";
-    _0xStyle.appendChild(document.createTextNode(_0xCssHex));
-    document.head.appendChild(_0xStyle);
-})();
-
-// 2. Disable Right Click, F12, Ctrl+Shift+I, and Ctrl+U (View Source)
-document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'F12' || 
-       (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
-       (e.ctrlKey && e.key === 'U')) {
-        e.preventDefault();
-    }
-});
-
-// 3. Debugger Trap Loop (Anti-DevTools Freeze)
-(function _0xTrap() {
-    try {
-        (function() { return false; }['constructor']('debugger')());
-        debugger;
-    } catch (e) {}
-    setTimeout(_0xTrap, 50);
-})();
-
-// ==========================================
-// CORE APP VARIABLES
-// ==========================================
-
 var MY_MAIN_JSON = "https://raw.githubusercontent.com/live4wap/links/refs/heads/main/jioo";
 var COOKIE_SOURCES = {
   mb: "https://mbcookie.amitbala1993.workers.dev/",
@@ -604,84 +586,12 @@ var floatLock = document.getElementById("floating-lock-btn");
 var qMenuEl   = document.getElementById("custom-q-menu");
 var qListCont = document.getElementById("q-list-container");
 
-// Popup Elements & Variables
+// Popup Elements
 var waPopup = document.getElementById("waPopup");
 var popupX = document.getElementById("popupX");
 var popupJoin = document.getElementById("popupJoin");
 var popupAlready = document.getElementById("popupAlready");
 
-// ==========================================
-// 5-MINUTE WHATSAPP POPUP LOGIC 
-// ==========================================
-var POPUP_HIDE_MINUTES = 30; 
-var lastCheckedChannelId = null;
-var popupCheckedForCurrentChannel = false;
-
-var _pageLoadTime = Date.now(); // Page load time track
-var _popupWaitTime = 5 * 60 * 1000; // 5 Minutes strict delay
-var _popupScheduled = false;
-
-function triggerPopup() {
-  var currentChannelId = new URLSearchParams(location.search).get("id");
-  if (!currentChannelId) {
-    return;
-  }
-
-  // Check if 5 minutes have passed since page refresh/load
-  var timeElapsed = Date.now() - _pageLoadTime;
-  if (timeElapsed < _popupWaitTime) {
-    if (!_popupScheduled) {
-      _popupScheduled = true;
-      // Schedule trigger strictly at the 5-minute mark
-      setTimeout(function() {
-        popupCheckedForCurrentChannel = false; // Reset to guarantee popup checks logic
-        triggerPopup();
-      }, _popupWaitTime - timeElapsed);
-    }
-    return; // Exit right now, don't show popup yet
-  }
-
-  if (lastCheckedChannelId === currentChannelId && popupCheckedForCurrentChannel) {
-    return; 
-  }
-
-  var hideTime = localStorage.getItem('waPopupHideTime');
-  var currentTime = new Date().getTime();
-  var hideDuration = POPUP_HIDE_MINUTES * 60 * 1000; 
-
-  if (!hideTime || (currentTime - parseInt(hideTime)) > hideDuration) {
-    if (waPopup) waPopup.classList.add('show');
-  }
-
-  popupCheckedForCurrentChannel = true;
-  lastCheckedChannelId = currentChannelId;
-}
-
-function closePopupAndSave() {
-  if (waPopup) waPopup.classList.remove('show');
-  localStorage.setItem('waPopupHideTime', new Date().getTime().toString());
-  
-  if (pcEl) {
-    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-      if (pcEl.requestFullscreen) {
-        pcEl.requestFullscreen().then(function() {
-          enforceAutoLandscape();
-        }).catch(function(e){});
-      } else if (pcEl.webkitRequestFullscreen) {
-        pcEl.webkitRequestFullscreen();
-        enforceAutoLandscape();
-      }
-    } else {
-      enforceAutoLandscape();
-    }
-  }
-}
-
-if(popupX) popupX.onclick = closePopupAndSave;
-if(popupJoin) popupJoin.onclick = closePopupAndSave;
-if(popupAlready) popupAlready.onclick = closePopupAndSave;
-
-// UI State variables
 var brOverlay = document.getElementById("brightness-overlay");
 var gestureHud = document.getElementById("gesture-indicator");
 var currentBrightness = 100;
@@ -713,7 +623,7 @@ var FIT_ICONS = {
 };
 
 // ==========================================
-// GLOBAL UNMUTE LOGIC
+// UNMUTE & AUTOPLAY LOGIC
 // ==========================================
 var userHasInteracted = false;
 
@@ -722,17 +632,24 @@ function unlockGlobalAudio() {
   userHasInteracted = true;
   
   vidEl.muted = false;
-  initializeAudioEngine(vidEl);
+  vidEl.volume = 1.0; 
   
-  if (tapGate && !tapGate.classList.contains("hidden")) {
+  try { initializeAudioEngine(vidEl); } catch(err) {}
+  
+  if (tapGate) {
     tapGate.classList.add("hidden");
-    if (vidEl.paused) vidEl.play().catch(function(){});
-    
-    // Timer checks will handle delay
-    setTimeout(triggerPopup, 500); 
+  }
+  
+  if (vidEl.paused) {
+    var playPromise = vidEl.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(function(e) { console.warn("Play interrupted", e); });
+    }
   }
 }
 
+// Bind directly to Tap Gate and Document
+if(tapGate) tapGate.addEventListener("click", unlockGlobalAudio);
 document.addEventListener("click", unlockGlobalAudio, { once: true });
 document.addEventListener("touchstart", unlockGlobalAudio, { once: true, passive: true });
 
@@ -743,6 +660,57 @@ async function enforceAutoLandscape() {
     }
   } catch (err) {}
 }
+
+// ==========================================
+// FIX: DYNAMIC AUDIO & PLAYBACK DETECTION POPUP
+// ==========================================
+var popupShownOnThisLoad = false;
+
+function handleAudioDetectPopup() {
+  var currentChannelId = new URLSearchParams(location.search).get("id");
+  if (!currentChannelId || popupShownOnThisLoad) return;
+  
+  // Logic: Only show popup if video is playing AND volume is unmuted/above 0
+  if (!vidEl.paused && !vidEl.muted && vidEl.volume > 0) {
+    if (waPopup) {
+      waPopup.classList.add('show');
+      popupShownOnThisLoad = true; // Ensure it only fires once per page refresh
+    }
+  }
+}
+
+// Bind detection logic to critical video media events
+vidEl.addEventListener("playing", handleAudioDetectPopup);
+vidEl.addEventListener("volumechange", handleAudioDetectPopup);
+vidEl.addEventListener("timeupdate", handleAudioDetectPopup);
+
+
+// ==========================================
+// FIX: FORCE FULLSCREEN AND LANDSCAPE ON POPUP CLOSE
+// ==========================================
+function closePopupAndSave() {
+  if (waPopup) waPopup.classList.remove('show');
+  
+  // Enforce rotation and fullscreen when closing popup (counts as user interaction)
+  if (pcEl) {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      if (pcEl.requestFullscreen) {
+        pcEl.requestFullscreen().then(function() {
+          enforceAutoLandscape();
+        }).catch(function(e){});
+      } else if (pcEl.webkitRequestFullscreen) {
+        pcEl.webkitRequestFullscreen();
+        enforceAutoLandscape();
+      }
+    } else {
+      enforceAutoLandscape();
+    }
+  }
+}
+
+if(popupX) popupX.onclick = closePopupAndSave;
+if(popupJoin) popupJoin.onclick = closePopupAndSave;
+if(popupAlready) popupAlready.onclick = closePopupAndSave;
 
 function decodeHTMLEntities(encodedString) {
   var txt = document.createElement("textarea");
@@ -1139,6 +1107,17 @@ function showErrorMsg(msg) {
   setLoadMsg(msg);
   overlayEl.style.display = "flex";
   showStatus(msg, "err", 0);
+}
+
+function shakaErrStr(err) {
+  if (!err) return "Unknown error";
+  var cats = { 1: "Network", 2: "Text", 3: "Media", 4: "Manifest", 5: "Streaming", 6: "DRM", 7: "Player" };
+  var s = (cats[err.category] || "Error") + " " + (err.category || "?") + ":" + (err.code || "?");
+  if (err.data && err.data[0]) {
+    var d = err.data[0];
+    if (typeof d === "string" && d.length) s += " — " + d.slice(0, 80);
+  }
+  return s;
 }
 
 function buildYoutubeQualityMenu(player) {
@@ -1843,10 +1822,10 @@ async function loadChannel(ch) {
   }
 
   if (userHasInteracted) {
-    tapGate.classList.add("hidden");
+    if (tapGate) tapGate.classList.add("hidden");
     vidEl.muted = false;
   } else {
-    tapGate.classList.remove("hidden");
+    if (tapGate) tapGate.classList.remove("hidden");
     vidEl.muted = true;
   }
 
@@ -1942,14 +1921,6 @@ async function loadChannel(ch) {
 
   vidEl.addEventListener("waiting", onStall);
   vidEl.addEventListener("stalled", onStall);
-  vidEl.addEventListener("playing", onPlaying);
-  
-  vidEl.addEventListener("playing", function() {
-    if (!vidEl.muted && vidEl.volume > 0 && tapGate.classList.contains("hidden")) triggerPopup();
-  });
-  vidEl.addEventListener("volumechange", function() {
-    if (!vidEl.muted && vidEl.volume > 0 && !vidEl.paused && tapGate.classList.contains("hidden")) triggerPopup();
-  });
 }
 
 async function switchToNextChannel(currentFailedId) {
@@ -1989,7 +1960,7 @@ async function switchToNextChannel(currentFailedId) {
 
 async function main() {
   var channelId = getChannelId();
-
+  
   if (channelId) {
     var ch = { id: channelId, name: "Live Stream (" + channelId + ")", logo: CUSTOM_LOGO };
     document.title = ch.name;
