@@ -17,8 +17,9 @@ html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;font-family:
 @keyframes spin{to{transform:rotate(360deg)}}
 #overlay p{color:#666;font-size:13px;letter-spacing:.4px;text-align:center;padding:0 20px;font-weight:500}
 
-#channel-list{position:fixed;inset:0;background:#0a0a0a;z-index:9998;display:none;flex-direction:column;overflow-y:auto;padding:24px 16px}
-#channel-list h1{color:#fff;font-size:16px;font-weight:600;letter-spacing:.5px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid #141414;text-align:center}
+/* TWEAK 1: Modern Glassmorphism & Sleeker Channel Cards */
+#channel-list{position:fixed;inset:0;background:radial-gradient(circle at top, #14141c 0%, #08080c 100%);z-index:9998;display:none;flex-direction:column;overflow-y:auto;padding:24px 16px}
+#channel-list h1{color:#fff;font-size:16px;font-weight:600;letter-spacing:.5px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:center}
 
 /* Search Bar Styles */
 #search-container {width:100%;max-width:400px;margin:0 auto 16px auto;}
@@ -26,9 +27,9 @@ html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;font-family:
 #ch-search:focus {border-color:#38bdf8}
 
 #ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
-.ch-card{position:relative;background:#111;border:1px solid #1a1a1a;border-radius:10px;padding:12px 10px;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;transition:background .2s,border-color .2s,transform .15s;-webkit-tap-highlight-color:transparent}
-.ch-card:hover{background:#161616;border-color:#262626}
-.ch-card:active{transform:scale(.97);background:#1a1a1a}
+.ch-card{position:relative;background:rgba(25, 25, 32, 0.6);border:1px solid rgba(255, 255, 255, 0.08);border-radius:14px;padding:12px 10px;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0, 0, 0, 0.3);transition:background .2s,border-color .2s,transform .15s,box-shadow .2s;-webkit-tap-highlight-color:transparent}
+.ch-card:hover{background:rgba(35, 35, 45, 0.8);border-color:rgba(56, 189, 248, 0.4);transform:translateY(-2px);box-shadow:0 12px 40px rgba(56, 189, 248, 0.15)}
+.ch-card:active{transform:scale(.97)}
 .ch-card img{width:56px;height:56px;border-radius:50%;object-fit:cover;background:#1a1a1a;border:1px solid #222}
 .ch-card span{color:#e5e5e5;font-size:12px;font-weight:500;line-height:1.4}
 .ch-fav-star{position:absolute;top:6px;right:8px;font-size:14px;color:#555;cursor:pointer;transition:color .2s}
@@ -147,7 +148,7 @@ video.mode-cover{object-fit:cover!important}
 }
 #stats-hud h3 { font-size: 12px; color: #fff; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
 
-/* LIVE CHAT OVERLAY */
+/* TWEAK 3: Sleek Live Chat Panel Styling */
 #live-chat-panel {
   position: absolute;
   top: 50px;
@@ -155,19 +156,19 @@ video.mode-cover{object-fit:cover!important}
   bottom: 80px;
   width: 260px;
   z-index: 10001;
-  background: rgba(15, 15, 20, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
+  background: rgba(12, 12, 16, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
   display: none;
   flex-direction: column;
   backdrop-filter: blur(10px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.8);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7);
   overflow: hidden;
 }
 #chat-header {
   padding: 10px 12px;
-  background: rgba(255,255,255,0.05);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   font-size: 12px;
   font-weight: 700;
   color: #fff;
@@ -195,8 +196,8 @@ video.mode-cover{object-fit:cover!important}
 }
 #chat-input {
   flex: 1;
-  background: #1e1e24;
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   padding: 6px 10px;
   color: #fff;
@@ -267,19 +268,20 @@ video.mode-cover{object-fit:cover!important}
 .shaka-controls-container button{color:#fff!important}
 .shaka-video-container{background-color:#000!important}
 
+/* TWEAK 2: Premium Quality & Settings Menu Styling */
 #custom-q-menu {
   position: absolute !important;
   bottom: 0px !important;
   left: 0px !important;
   width: 100% !important;
-  background: rgba(15, 15, 15, 0.98) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px 16px 0 0;
-  padding: 12px 0 24px 0;
+  background: rgba(12, 12, 16, 0.95) !important;
+  border-top: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 20px 20px 0 0;
+  padding: 16px 0 30px 0;
   display: none;
   flex-direction: column;
   z-index: 20000 !important;
-  box-shadow: 0px -4px 20px rgba(0,0,0,0.9);
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   max-height: 70vh;
@@ -295,7 +297,7 @@ video.mode-cover{object-fit:cover!important}
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 .q-item {
-  padding: 14px 20px;
+  padding: 14px 24px;
   color: #f1f1f1;
   font-size: 14px;
   font-weight: 500;
@@ -303,7 +305,9 @@ video.mode-cover{object-fit:cover!important}
   display: flex;
   align-items: center;
   justify-content: space-between;
+  transition: background 0.2s, color 0.2s;
 }
+.q-item:hover { background: rgba(56, 189, 248, 0.08); }
 .q-item:active { background: rgba(255, 255, 255, 0.1); }
 .q-item.active { color: #38bdf8 !important; font-weight: 600; }
 .q-item.active::after {
@@ -603,7 +607,7 @@ var FIT_ICONS = {
 };
 
 // ==========================================
-// GLOBAL UNMUTE LOGIC (NEW)
+// GLOBAL UNMUTE LOGIC
 // ==========================================
 var userHasInteracted = false;
 
@@ -611,25 +615,19 @@ function unlockGlobalAudio() {
   if (userHasInteracted) return;
   userHasInteracted = true;
   
-  // Audio unlock and EQ initialization
   vidEl.muted = false;
   initializeAudioEngine(vidEl);
   
-  // Hide Tap Gate if it's visible
   if (tapGate && !tapGate.classList.contains("hidden")) {
     tapGate.classList.add("hidden");
     if (vidEl.paused) vidEl.play().catch(function(){});
     
-    // Popup triggers because sound is successfully activated
     setTimeout(triggerPopup, 500);
   }
 }
 
-// Track first touch anywhere on document to activate sound automatically
 document.addEventListener("click", unlockGlobalAudio, { once: true });
 document.addEventListener("touchstart", unlockGlobalAudio, { once: true, passive: true });
-// ==========================================
-
 
 async function enforceAutoLandscape() {
   try {
@@ -640,7 +638,11 @@ async function enforceAutoLandscape() {
 }
 
 function triggerPopup() {
-  var currentChannelId = new URLSearchParams(location.search).get("id") || "home";
+  // FIX: Home Page par popup completely block karne ke liye check
+  var currentChannelId = new URLSearchParams(location.search).get("id");
+  if (!currentChannelId) {
+    return;
+  }
 
   if (lastCheckedChannelId === currentChannelId && popupCheckedForCurrentChannel) {
     return; 
@@ -766,10 +768,10 @@ function initLiveChat() {
   if (!chatBox) return;
 
   var botComments = [
-    { name: "Rahul_07", text: "What a shot!! \uD83D\uDD25" },
-    { name: "CricketFanatic", text: "Quality is super clear today \uD83D\uDC4C" },
-    { name: "Amit_VK", text: "Come on India! \uD83C\uDDEE\uD83C\uDDF3" },
-    { name: "SkyWalker", text: "Sixer \uD83D\uDCA5\uD83D\uDCA5" },
+    { name: "Rahul_07", text: "What a shot!! 🔥" },
+    { name: "CricketFanatic", text: "Quality is super clear today 🤌" },
+    { name: "Amit_VK", text: "Come on India! 🇮🇳" },
+    { name: "SkyWalker", text: "Sixer 💥💥" },
     { name: "Rohan_S", text: "No lag at all, smooth stream" },
     { name: "ProViewer", text: "Great match commentary!" }
   ];
@@ -1085,7 +1087,7 @@ function shakaErrStr(err) {
   var s = (cats[err.category] || "Error") + " " + (err.category || "?") + ":" + (err.code || "?");
   if (err.data && err.data[0]) {
     var d = err.data[0];
-    if (typeof d === "string" && d.length) s += " \u2014 " + d.slice(0, 80);
+    if (typeof d === "string" && d.length) s += " — " + d.slice(0, 80);
   }
   return s;
 }
@@ -1310,7 +1312,7 @@ function injectCustomControls(container, video, player) {
     shareBtn.addEventListener("click", function(e) {
       e.stopPropagation();
       var shareTitle = document.title || "Sports Live";
-      var rawMessage = "\uD83D\uDD25 *LIVE MATCH STREAMING* \uD83D\uDD25\n\nभाई, यहाँ HD में बिना किसी Ads के लाइव मैच चल रहा है, तू भी देख! \uD83C\uDFCF\u26BD\n\nDirect Link \uD83D\uDC47\n" + window.location.href;
+      var rawMessage = "🔥 *LIVE MATCH STREAMING* 🔥\n\nभाई, यहाँ HD में बिना किसी Ads के लाइव मैच चल रहा है, तू भी देख! 🏏⚽\n\nDirect Link 👇\n" + window.location.href;
       var shareText = decodeHTMLEntities(rawMessage);
 
       if (navigator.share) {
@@ -1533,7 +1535,7 @@ function injectCustomControls(container, video, player) {
 function copyToClipboard(text) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(text).then(function() {
-      showStatus("Link Copied to Clipboard! \uD83D\uDCCB", "ok", 3000);
+      showStatus("Link Copied to Clipboard! 📋", "ok", 3000);
     }).catch(function() {
       fallbackWindowOpen(text);
     });
@@ -1597,7 +1599,7 @@ function setupSwipeGestures(targetFrame, video) {
       var nextBright = Math.min(Math.max(startBright + bChange, 10), 100); 
       currentBrightness = nextBright;
       brOverlay.style.opacity = (100 - currentBrightness) / 100;
-      showHud("\u2600 Brightness: " + Math.round(currentBrightness) + "%");
+      showHud("☀️ Brightness: " + Math.round(currentBrightness) + "%");
     } 
     else if (mode === "volume") {
       var vChange = -(deltaY / targetFrame.clientHeight) * 2.5; 
@@ -1608,12 +1610,12 @@ function setupSwipeGestures(targetFrame, video) {
         setBoostedVolume(1.0);
         video.volume = dynamicLimit;
         if (dynamicLimit > 0) video.muted = false;
-        showHud("\uD83D\uDD0A Volume: " + Math.round(dynamicLimit * 100) + "%");
+        showHud("🔊 Volume: " + Math.round(dynamicLimit * 100) + "%");
       } else {
         initializeAudioEngine(video);
         video.volume = 1.0; 
         setBoostedVolume(dynamicLimit); 
-        showHud("\uD83D\uDD0A Volume Boost: " + Math.round(dynamicLimit * 100) + "% \uD83D\uDD25");
+        showHud("🔊 Volume Boost: " + Math.round(dynamicLimit * 100) + "% 🔥");
       }
     }
   }, { passive: true });
@@ -1629,10 +1631,10 @@ function setupSwipeGestures(targetFrame, video) {
 
       if (touchX > screenWidth / 2) {
         video.currentTime += 10;
-        showHud("\u23E9 +10s");
+        showHud("⏩ +10s");
       } else {
         video.currentTime -= 10;
-        showHud("\u23EA -10s");
+        showHud("⏪ -10s");
       }
     }
     lastTapTime = currentTime;
@@ -1654,7 +1656,7 @@ document.addEventListener("keydown", function(e) {
       break;
     case "m":
       vidEl.muted = !vidEl.muted;
-      showStatus(vidEl.muted ? "Muted \uD83D\uDD07" : "Unmuted \uD83D\uDD0A", "ok", 1500);
+      showStatus(vidEl.muted ? "Muted 🔇" : "Unmuted 🔊", "ok", 1500);
       break;
     case "f":
       if (!document.fullscreenElement) {
@@ -1667,11 +1669,11 @@ document.addEventListener("keydown", function(e) {
       break;
     case "arrowright":
       vidEl.currentTime += 5;
-      showStatus("\u23E9 +5s", "ok", 1000);
+      showStatus("⏩ +5s", "ok", 1000);
       break;
     case "arrowleft":
       vidEl.currentTime -= 5;
-      showStatus("\u23EA -5s", "ok", 1000);
+      showStatus("⏪ -5s", "ok", 1000);
       break;
   }
 });
@@ -1791,7 +1793,6 @@ async function loadChannel(ch) {
     return;
   }
 
-  // FIX: Check if user has already interacted anywhere on the page
   if (userHasInteracted) {
     tapGate.classList.add("hidden");
     vidEl.muted = false;
@@ -1894,7 +1895,6 @@ async function loadChannel(ch) {
   vidEl.addEventListener("stalled", onStall);
   vidEl.addEventListener("playing", onPlaying);
   
-  // FIX: Fallback Popup triggers strictly check if tap-gate is hidden!
   vidEl.addEventListener("playing", function() {
     if (!vidEl.muted && vidEl.volume > 0 && tapGate.classList.contains("hidden")) triggerPopup();
   });
