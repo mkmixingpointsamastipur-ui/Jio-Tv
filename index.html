@@ -37,9 +37,18 @@ html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;font-family:
 #pc{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;background:#000!important;display:none;z-index:9990!important;align-items:center;justify-content:center;touch-action:manipulation}
 .shaka-video-container {width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;position:relative!important}
 
-video, .shaka-video{width:100vw!important;height:100vh!important;object-fit:contain;background:#000000!important;will-change:auto!important}
+video, .shaka-video{width:100vw!important;height:100vh!important;object-fit:contain;background:#000000!important;will-change:auto!important;crossorigin:anonymous!important}
 video.mode-fill{object-fit:fill!important}
 video.mode-cover{object-fit:cover!important}
+
+/* Theater / Cinema Mode Style */
+#pc.theater-mode video, #pc.theater-mode .shaka-video {
+  width: 85vw !important;
+  height: 85vh !important;
+  margin: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+}
 
 .custom-watermark{
   position:absolute!important;
@@ -100,9 +109,9 @@ video.mode-cover{object-fit:cover!important}
   display: none !important;
 }
 
-.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-share-btn, .shaka-custom-fs-btn, .custom-q-trigger-btn{background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;}
-.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-share-btn:hover, .shaka-custom-fs-btn:hover, .custom-q-trigger-btn:hover{opacity:1}
-.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-share-btn svg, .shaka-custom-fs-btn svg, .custom-q-trigger-btn svg{width:18px;height:18px;display:block}
+.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-share-btn, .shaka-custom-fs-btn, .custom-q-trigger-btn, .shaka-reload-btn, .shaka-theater-btn, .shaka-next-btn {background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;}
+.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-share-btn:hover, .shaka-custom-fs-btn:hover, .custom-q-trigger-btn:hover, .shaka-reload-btn:hover, .shaka-theater-btn:hover, .shaka-next-btn:hover{opacity:1}
+.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-share-btn svg, .shaka-custom-fs-btn svg, .custom-q-trigger-btn svg, .shaka-reload-btn svg, .shaka-theater-btn svg, .shaka-next-btn svg{width:18px;height:18px;display:block}
 .shaka-wa-btn svg{fill:#25D366}
 .shaka-lock-btn svg{fill:#ffffff}
 .shaka-timer-btn svg{fill:#ffcc00}
@@ -112,6 +121,9 @@ video.mode-cover{object-fit:cover!important}
 .shaka-chat-btn svg{fill:#38bdf8}
 .shaka-share-btn svg{fill:#25D366}
 .shaka-custom-fs-btn svg{fill:#38bdf8}
+.shaka-reload-btn svg{fill:#38df72}
+.shaka-theater-btn svg{fill:#fb923c}
+.shaka-next-btn svg{fill:#ffffff}
 .shaka-pip-btn svg, .custom-q-trigger-btn svg{fill:#ffffff}
 
 /* STATS FOR NERDS OVERLAY */
@@ -295,7 +307,7 @@ video.mode-cover{object-fit:cover!important}
 .q-item:active { background: rgba(255, 255, 255, 0.1); }
 .q-item.active { color: #38bdf8 !important; font-weight: 600; }
 .q-item.active::after {
-  content: '✓';
+  content: '\2713'; 
   color: #38bdf8;
   font-weight: 700;
   font-size: 14px;
@@ -350,7 +362,7 @@ video.mode-cover{object-fit:cover!important}
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:21000 !important; 
+  z-index:99999;
   opacity:0;
   pointer-events:none;
   transition:opacity .3s ease;
@@ -427,6 +439,10 @@ video.mode-cover{object-fit:cover!important}
   border-radius:25px;
   font-weight:bold;
   font-size:16px;
+  transition: background 0.2s ease;
+}
+.rgb-join-btn:hover{
+  background:#008754;
 }
 .rgb-already-btn{
   background:transparent;
@@ -439,18 +455,6 @@ video.mode-cover{object-fit:cover!important}
 </style>
 <style type="text/css">* {user-select: auto !important; -webkit-user-select: auto !important;}</style></head>
 <body>
-
-<div class="rgb-popup-overlay" id="waPopup">
-  <div class="rgb-popup-box">
-    <div class="rgb-close-btn" id="popupX">✖</div>
-    <h2>FOLLOW US !!</h2>
-    <p class="sub-title">Join our WhatsApp Channel</p>
-    <h1 class="brand-name">RK LINK WALA ™</h1>
-    <p class="footer-text">For Instant Updates & Exclusive Links.</p>
-    <a href="https://whatsapp.com/channel/0029Vb6Ckmn1noz7GiJlsP3P" class="rgb-join-btn" id="popupJoin" target="_blank">JOIN NOW</a>
-    <button class="rgb-already-btn" id="popupAlready">Already Joined</button>
-  </div>
-</div>
 
 <div id="overlay">
   <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
@@ -499,7 +503,8 @@ video.mode-cover{object-fit:cover!important}
     <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>
   </div>
 
-  <video id="v" autoplay="" playsinline="" webkit-playsinline="" preload="auto"></video>
+  <!-- FIX: Video default strictly muted -->
+  <video id="v" autoplay="" muted="" playsinline="" webkit-playsinline="" preload="auto" crossorigin="anonymous"></video>
 
   <div id="custom-q-menu">
     <h2>Quality for current video</h2>
@@ -515,6 +520,19 @@ video.mode-cover{object-fit:cover!important}
       </div>
       <span id="tap-label">TAP TO UNMUTE & WATCH LIVE</span>
     </div>
+  </div>
+</div>
+
+<!-- WhatsApp Popup HTML -->
+<div class="rgb-popup-overlay" id="waPopup">
+  <div class="rgb-popup-box">
+    <div class="rgb-close-btn" id="popupX">✖</div>
+    <h2>FOLLOW US !!</h2>
+    <p class="sub-title">Join our WhatsApp Channel</p>
+    <h1 class="brand-name">RK LINK WALA ™</h1>
+    <p class="footer-text">For Instant Updates & Exclusive Links.</p>
+    <a href="https://whatsapp.com/channel/0029Vb6Ckmn1noz7GiJlsP3P" class="rgb-join-btn" id="popupJoin" target="_blank">JOIN NOW</a>
+    <button class="rgb-already-btn" id="popupAlready">Already Joined</button>
   </div>
 </div>
 
@@ -544,6 +562,15 @@ var tapGate   = document.getElementById("tap-gate");
 var floatLock = document.getElementById("floating-lock-btn");
 var qMenuEl   = document.getElementById("custom-q-menu");
 var qListCont = document.getElementById("q-list-container");
+
+// Popup Elements & Variables
+var waPopup = document.getElementById("waPopup");
+var popupX = document.getElementById("popupX");
+var popupJoin = document.getElementById("popupJoin");
+var popupAlready = document.getElementById("popupAlready");
+var POPUP_HIDE_MINUTES = 30; 
+var lastCheckedChannelId = null;
+var popupCheckedForCurrentChannel = false;
 
 var brOverlay = document.getElementById("brightness-overlay");
 var gestureHud = document.getElementById("gesture-indicator");
@@ -575,19 +602,106 @@ var FIT_ICONS = {
   cover:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M6 7l3 3m0 0H7m2 0V8m9-1l-3 3m0 0h2m-2 0V8M6 13l3-3m0 0H7m2 0v2m9 1l-3-3m0 0h2m-2 0v2"/></svg>'
 };
 
-// HELPER: Convert Blogger Encoded HTML Entities back to real UTF-8 text
+// ==========================================
+// GLOBAL UNMUTE LOGIC (NEW)
+// ==========================================
+var userHasInteracted = false;
+
+function unlockGlobalAudio() {
+  if (userHasInteracted) return;
+  userHasInteracted = true;
+  
+  // Audio unlock and EQ initialization
+  vidEl.muted = false;
+  initializeAudioEngine(vidEl);
+  
+  // Hide Tap Gate if it's visible
+  if (tapGate && !tapGate.classList.contains("hidden")) {
+    tapGate.classList.add("hidden");
+    if (vidEl.paused) vidEl.play().catch(function(){});
+    
+    // Popup triggers because sound is successfully activated
+    setTimeout(triggerPopup, 500);
+  }
+}
+
+// Track first touch anywhere on document to activate sound automatically
+document.addEventListener("click", unlockGlobalAudio, { once: true });
+document.addEventListener("touchstart", unlockGlobalAudio, { once: true, passive: true });
+// ==========================================
+
+
+async function enforceAutoLandscape() {
+  try {
+    if (screen.orientation && screen.orientation.lock) {
+      await screen.orientation.lock("landscape").catch(function(e) {});
+    }
+  } catch (err) {}
+}
+
+function triggerPopup() {
+  var currentChannelId = new URLSearchParams(location.search).get("id") || "home";
+
+  if (lastCheckedChannelId === currentChannelId && popupCheckedForCurrentChannel) {
+    return; 
+  }
+
+  var hideTime = localStorage.getItem('waPopupHideTime');
+  var currentTime = new Date().getTime();
+  var hideDuration = POPUP_HIDE_MINUTES * 60 * 1000; 
+
+  if (!hideTime || (currentTime - parseInt(hideTime)) > hideDuration) {
+    if (waPopup) waPopup.classList.add('show');
+  }
+
+  popupCheckedForCurrentChannel = true;
+  lastCheckedChannelId = currentChannelId;
+}
+
+function closePopupAndSave() {
+  if (waPopup) waPopup.classList.remove('show');
+  localStorage.setItem('waPopupHideTime', new Date().getTime().toString());
+  
+  if (pcEl) {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      if (pcEl.requestFullscreen) {
+        pcEl.requestFullscreen().then(function() {
+          enforceAutoLandscape();
+        }).catch(function(e){});
+      } else if (pcEl.webkitRequestFullscreen) {
+        pcEl.webkitRequestFullscreen();
+        enforceAutoLandscape();
+      }
+    } else {
+      enforceAutoLandscape();
+    }
+  }
+}
+
+if(popupX) popupX.onclick = closePopupAndSave;
+if(popupJoin) popupJoin.onclick = closePopupAndSave;
+if(popupAlready) popupAlready.onclick = closePopupAndSave;
+
 function decodeHTMLEntities(encodedString) {
   var txt = document.createElement("textarea");
   txt.innerHTML = encodedString;
   return txt.value;
 }
 
-// FAST FETCH WITH REDUCED TIMEOUT (1.8 Seconds max)
 function fetchWithTimeout(url, timeoutMs) {
   timeoutMs = timeoutMs || 1800;
   var controller = new AbortController();
   var timer = setTimeout(function() { controller.abort(); }, timeoutMs);
-  return fetch(url, { signal: controller.signal }).finally(function() { clearTimeout(timer); });
+  return fetch(url, { signal: controller.signal })
+    .then(function(res) {
+      clearTimeout(timer);
+      if (!res.ok) throw new Error();
+      return res;
+    })
+    .catch(function(err) {
+      clearTimeout(timer);
+      throw err;
+    });
 }
 
 function showStatus(msg, type, dur) {
@@ -637,36 +751,6 @@ function appendCookieToUri(uri, rawCookie) {
   return uri + (uri.indexOf("?") !== -1 ? "&" : "?") + "__hdnea__=" + rawCookie;
 }
 
-function closePopup(){
-  var waPopup = document.getElementById('waPopup');
-  if (waPopup) waPopup.classList.remove('show');
-
-  var videoContainer = document.getElementById('pc');
-  if (videoContainer) {
-    if (videoContainer.requestFullscreen) {
-        videoContainer.requestFullscreen().then(function() {
-          enforceAutoLandscape();
-        }).catch(function(){});
-    } else if (videoContainer.webkitRequestFullscreen) {
-        videoContainer.webkitRequestFullscreen();
-        enforceAutoLandscape();
-    }
-  }
-}
-
-async function enforceAutoLandscape() {
-  try {
-    if (screen.orientation && screen.orientation.lock) {
-      await screen.orientation.lock("landscape").catch(function(e) {
-        console.log("Orientation lock bypassed/unsupported:", e);
-      });
-    }
-  } catch (err) {}
-}
-
-/* ==========================================
-   LOCK BUTTON AUTO-HIDE LOGIC
-   ========================================== */
 function showFloatingLockTemp() {
   floatLock.classList.add("show");
   if (lockHideTimer) clearTimeout(lockHideTimer);
@@ -675,9 +759,6 @@ function showFloatingLockTemp() {
   }, 3000);
 }
 
-/* ==========================================
-   SIMULATED LIVE CHAT LOGIC
-   ========================================== */
 function initLiveChat() {
   var chatBox = document.getElementById("chat-messages");
   var input = document.getElementById("chat-input");
@@ -685,10 +766,10 @@ function initLiveChat() {
   if (!chatBox) return;
 
   var botComments = [
-    { name: "Rahul_07", text: "What a shot!! 🔥" },
-    { name: "CricketFanatic", text: "Quality is super clear today 👌" },
-    { name: "Amit_VK", text: "Come on India! 🇮🇳" },
-    { name: "SkyWalker", text: "Sixer 💥💥" },
+    { name: "Rahul_07", text: "What a shot!! \uD83D\uDD25" },
+    { name: "CricketFanatic", text: "Quality is super clear today \uD83D\uDC4C" },
+    { name: "Amit_VK", text: "Come on India! \uD83C\uDDEE\uD83C\uDDF3" },
+    { name: "SkyWalker", text: "Sixer \uD83D\uDCA5\uD83D\uDCA5" },
     { name: "Rohan_S", text: "No lag at all, smooth stream" },
     { name: "ProViewer", text: "Great match commentary!" }
   ];
@@ -730,7 +811,7 @@ async function buildPlayerConfigs(targetId) {
   var mappingSources = [MY_MAIN_JSON, COOKIE_SOURCES.sayan, COOKIE_SOURCES.binge];
 
   var mapResults = await Promise.allSettled(
-    mappingSources.map(url => fetchWithTimeout(url, 2000).then(r => r.ok ? r.json() : null).catch(() => null))
+    mappingSources.map(url => fetchWithTimeout(url, 1800).then(r => r.ok ? r.json() : null).catch(() => null))
   );
 
   for (var i = 0; i < mapResults.length; i++) {
@@ -765,9 +846,9 @@ async function buildPlayerConfigs(targetId) {
 
   var isMb = streamUrl.includes("jiotvmb") || streamUrl.includes("mb");
   var cookieReqs = [
-    fetchWithTimeout(isMb ? COOKIE_SOURCES.mb : COOKIE_SOURCES.pl, 2000).then(r => r.ok ? r.json() : null).catch(() => null),
-    fetchWithTimeout(COOKIE_SOURCES.sayan, 2000).then(r => r.ok ? r.json() : null).catch(() => null),
-    fetchWithTimeout(COOKIE_SOURCES.binge, 2000).then(r => r.ok ? r.json() : null).catch(() => null)
+    fetchWithTimeout(isMb ? COOKIE_SOURCES.mb : COOKIE_SOURCES.pl, 1800).then(r => r.ok ? r.json() : null).catch(() => null),
+    fetchWithTimeout(COOKIE_SOURCES.sayan, 1800).then(r => r.ok ? r.json() : null).catch(() => null),
+    fetchWithTimeout(COOKIE_SOURCES.binge, 1800).then(r => r.ok ? r.json() : null).catch(() => null)
   ];
 
   var cookieResults = await Promise.allSettled(cookieReqs);
@@ -809,13 +890,11 @@ async function fetchInitialChannelList() {
   var channelsMap = {};
   var syncLists = [COOKIE_SOURCES.sayan, COOKIE_SOURCES.binge, MY_MAIN_JSON];
 
-  var results = await Promise.allSettled(
-    syncLists.map(url => fetchWithTimeout(url, 2000).then(r => r.ok ? r.json() : null).catch(() => null))
-  );
+  var promises = syncLists.map(url => fetchWithTimeout(url, 1500).then(r => r.json()).catch(() => null));
+  var results = await Promise.all(promises);
 
-  results.forEach(res => {
-    if (res.status === 'fulfilled' && res.value) {
-      var data = res.value;
+  results.forEach(data => {
+    if (data) {
       var arr = Array.isArray(data) ? data : (data.channels || data.result || []);
       arr.forEach(function(c) {
         var id = String(c.id || c.channel_id || c.k_id || "");
@@ -836,7 +915,12 @@ async function fetchInitialChannelList() {
 }
 
 function initializeAudioEngine(video) {
-  if (audioCtx) return;
+  if (audioCtx) {
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume().catch(function(e){ console.warn("Audio resume error:", e); });
+    }
+    return;
+  }
   try {
     var AudioContext = window.AudioContext || window.webkitAudioContext;
     audioCtx = new AudioContext();
@@ -852,8 +936,7 @@ function initializeAudioEngine(video) {
     midFilter.Q.value = 1.0;
     midFilter.frequency.value = 1000;
 
-    trebleFilter = document.createElement ? audioCtx.createBiquadFilter() : null;
-    if(!trebleFilter) trebleFilter = audioCtx.createBiquadFilter();
+    trebleFilter = audioCtx.createBiquadFilter();
     trebleFilter.type = "highshelf";
     trebleFilter.frequency.value = 3000;
 
@@ -862,6 +945,10 @@ function initializeAudioEngine(video) {
     midFilter.connect(trebleFilter);
     trebleFilter.connect(gainNode);
     gainNode.connect(audioCtx.destination);
+    
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume().catch(function(e){ console.warn("Audio creation resume error:", e); });
+    }
   } catch (e) {
     console.error("Audio core error", e);
   }
@@ -947,13 +1034,7 @@ function showChannelList(channels) {
       setLoadMsg("Resolving " + ch.name + " stream branch...");
       document.title = ch.name;
       
-      if (globalPlayer) {
-        try {
-          await globalPlayer.destroy();
-          globalPlayer = null;
-        } catch(err) { console.log(err); }
-      }
-      await startPlayer(ch);
+      await loadChannel(ch);
     });
     
     fragment.appendChild(a);
@@ -979,12 +1060,6 @@ function showChannelList(channels) {
 async function handleBackNavigation() {
   var channelId = getChannelId();
   if (!channelId) {
-    if (globalPlayer) {
-      try {
-        await globalPlayer.destroy();
-        globalPlayer = null;
-      } catch(e){}
-    }
     document.title = "Sports Live";
     qMenuEl.classList.remove("show");
     showChannelList(cachedChannels);
@@ -992,10 +1067,7 @@ async function handleBackNavigation() {
     var ch = cachedChannels.find(c => c.id === channelId);
     if (!ch) ch = { id: channelId, name: "Live Stream (" + channelId + ")", logo: CUSTOM_LOGO };
     listEl.style.display = "none";
-    if (globalPlayer) {
-      try { await globalPlayer.destroy(); globalPlayer = null; } catch(e){}
-    }
-    startPlayer(ch);
+    await loadChannel(ch);
   }
 }
 
@@ -1080,7 +1152,6 @@ function injectCustomControls(container, video, player) {
     controlsContainer.appendChild(wm);
   }
 
-  // IN-PLAYER FEED SWITCHER
   if (!panel.querySelector(".custom-feed-switcher")) {
     var switcher = document.createElement("select");
     switcher.className = "custom-feed-switcher";
@@ -1109,10 +1180,7 @@ function injectCustomControls(container, video, player) {
       if (overlayEl) overlayEl.style.display = "flex";
       setLoadMsg("Switching feed to: " + targetCh.name + "...");
 
-      if (globalPlayer) {
-        try { await globalPlayer.destroy(); globalPlayer = null; } catch(err) {}
-      }
-      await startPlayer(targetCh);
+      await loadChannel(targetCh);
     });
 
     var qBtnAnchor = panel.querySelector(".custom-q-trigger-btn");
@@ -1120,7 +1188,71 @@ function injectCustomControls(container, video, player) {
     else panel.appendChild(switcher);
   }
 
-  // 📊 STATS FOR NERDS BUTTON
+  if (!panel.querySelector(".shaka-reload-btn")) {
+    var reloadBtn = document.createElement("button");
+    reloadBtn.className = "shaka-reload-btn";
+    reloadBtn.title = "Reload Stream";
+    reloadBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
+    reloadBtn.addEventListener("click", async function(e) {
+      e.stopPropagation();
+      showStatus("Reloading Stream...", "warn", 2000);
+      var currentId = getChannelId();
+      var targetCh = cachedChannels.find(function(c) { return String(c.id) === String(currentId); });
+      if (targetCh) {
+        await loadChannel(targetCh);
+      } else {
+        location.reload();
+      }
+    });
+    panel.appendChild(reloadBtn);
+  }
+
+  if (!panel.querySelector(".shaka-theater-btn")) {
+    var theaterBtn = document.createElement("button");
+    theaterBtn.className = "shaka-theater-btn";
+    theaterBtn.title = "Toggle Theater Mode";
+    theaterBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 4H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H5V8h14v10z"/></svg>';
+    theaterBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      pcEl.classList.toggle("theater-mode");
+      var isTheater = pcEl.classList.contains("theater-mode");
+      showStatus(isTheater ? "Theater Mode ON" : "Theater Mode OFF", "ok", 2000);
+    });
+    panel.appendChild(theaterBtn);
+  }
+
+  if (!panel.querySelector(".shaka-next-btn")) {
+    var nextBtn = document.createElement("button");
+    nextBtn.className = "shaka-next-btn";
+    nextBtn.title = "Next Channel";
+    nextBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>';
+    nextBtn.addEventListener("click", async function(e) {
+      e.stopPropagation();
+      if(isInterfaceLocked) return;
+      var currentId = getChannelId();
+      var currentIndex = cachedChannels.findIndex(function(c) { return String(c.id) === String(currentId); });
+      if (currentIndex !== -1 && cachedChannels.length > 0) {
+          var nextIndex = (currentIndex + 1) % cachedChannels.length;
+          var targetCh = cachedChannels[nextIndex];
+          
+          var targetUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?id=" + encodeURIComponent(targetCh.id);
+          window.history.pushState({ id: targetCh.id }, '', targetUrl);
+          document.title = targetCh.name;
+          
+          if (overlayEl) overlayEl.style.display = "flex";
+          setLoadMsg("Switching to: " + targetCh.name + "...");
+          
+          var switcher = panel.querySelector(".custom-feed-switcher");
+          if(switcher) switcher.value = targetCh.id;
+
+          await loadChannel(targetCh);
+      } else {
+          showStatus("No next channel available in list", "warn", 2000);
+      }
+    });
+    panel.appendChild(nextBtn);
+  }
+
   if (!panel.querySelector(".shaka-stats-btn")) {
     var statsBtn = document.createElement("button");
     statsBtn.className = "shaka-stats-btn";
@@ -1137,9 +1269,9 @@ function injectCustomControls(container, video, player) {
       if (!isShowing) {
         if (statsInterval) clearInterval(statsInterval);
         statsInterval = setInterval(function() {
-          if (!player || hud.style.display !== "block") return;
-          var stats = player.getStats();
-          var track = player.getVariantTracks().find(t => t.active);
+          if (!globalPlayer || hud.style.display !== "block") return;
+          var stats = globalPlayer.getStats();
+          var track = globalPlayer.getVariantTracks().find(t => t.active);
           
           document.getElementById("st-res").textContent = video.videoWidth + "x" + video.videoHeight;
           document.getElementById("st-bw").textContent = ((stats.bandwidthEstimate || 0) / 1000000).toFixed(2) + " Mbps";
@@ -1152,7 +1284,6 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(statsBtn);
   }
 
-  // 💬 LIVE CHAT BUTTON
   if (!panel.querySelector(".shaka-chat-btn")) {
     var chatBtn = document.createElement("button");
     chatBtn.className = "shaka-chat-btn";
@@ -1170,7 +1301,6 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(chatBtn);
   }
 
-  // 📤 DIRECT SHARE BUTTON (DECODES HTML ENTITIES)
   if (!panel.querySelector(".shaka-share-btn")) {
     var shareBtn = document.createElement("button");
     shareBtn.className = "shaka-share-btn";
@@ -1180,7 +1310,7 @@ function injectCustomControls(container, video, player) {
     shareBtn.addEventListener("click", function(e) {
       e.stopPropagation();
       var shareTitle = document.title || "Sports Live";
-      var rawMessage = "🔥 *LIVE MATCH STREAMING* 🔥\n\nभाई, यहाँ HD में बिना किसी Ads के लाइव मैच चल रहा है, तू भी देख! 🏏⚽\n\nDirect Link 👇\n" + window.location.href;
+      var rawMessage = "\uD83D\uDD25 *LIVE MATCH STREAMING* \uD83D\uDD25\n\nभाई, यहाँ HD में बिना किसी Ads के लाइव मैच चल रहा है, तू भी देख! \uD83C\uDFCF\u26BD\n\nDirect Link \uD83D\uDC47\n" + window.location.href;
       var shareText = decodeHTMLEntities(rawMessage);
 
       if (navigator.share) {
@@ -1188,15 +1318,16 @@ function injectCustomControls(container, video, player) {
           title: shareTitle,
           text: shareText,
           url: window.location.href
-        }).catch(function(){});
+        }).catch(function(err) {
+          copyToClipboard(shareText);
+        });
       } else {
-        window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(shareText), "_blank");
+        copyToClipboard(shareText);
       }
     });
     panel.appendChild(shareBtn);
   }
 
-  // PLAYBACK SPEED BUTTON
   if (!panel.querySelector(".shaka-speed-btn")) {
     var speedBtn = document.createElement("button");
     speedBtn.className = "shaka-speed-btn";
@@ -1214,7 +1345,6 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(speedBtn);
   }
 
-  // AUDIO EQUALIZER BUTTON
   if (!panel.querySelector(".shaka-eq-btn")) {
     var eqBtn = document.createElement("button");
     eqBtn.className = "shaka-eq-btn";
@@ -1231,7 +1361,6 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(eqBtn);
   }
   
-  // SLEEP TIMER BUTTON
   if (!panel.querySelector(".shaka-timer-btn")) {
     var timerBtn = document.createElement("button");
     timerBtn.className = "shaka-timer-btn";
@@ -1253,7 +1382,6 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(timerBtn);
   }
 
-  // PICTURE IN PICTURE BUTTON
   if (!panel.querySelector(".shaka-pip-btn") && document.pictureInPictureEnabled) {
     var pipBtn = document.createElement("button");
     pipBtn.className = "shaka-pip-btn";
@@ -1274,7 +1402,6 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(pipBtn);
   }
 
-  // LOCK INTERFACE BUTTON WITH AUTO-HIDE
   if (!panel.querySelector(".shaka-lock-btn")) {
     var lockBtn = document.createElement("button");
     lockBtn.className = "shaka-lock-btn";
@@ -1291,7 +1418,6 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(lockBtn);
   }
 
-  // UNLOCK ACTION
   floatLock.onclick = function(e) {
     e.stopPropagation();
     isInterfaceLocked = false;
@@ -1301,14 +1427,12 @@ function injectCustomControls(container, video, player) {
     showStatus("Controls Unlocked", "ok", 3000);
   };
 
-  // TAP ON CONTAINER WHEN LOCKED SHOWS LOCK BUTTON FOR 3 SECONDS
   pcEl.addEventListener("click", function() {
     if (isInterfaceLocked) {
       showFloatingLockTemp();
     }
   });
 
-  // WHATSAPP BUTTON IN PLAYER
   if (!panel.querySelector(".shaka-wa-btn")) {
     var waBtn = document.createElement("button");
     waBtn.className = "shaka-wa-btn";
@@ -1321,22 +1445,20 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(waBtn);
   }
 
-  // QUALITY MENU TRIGGER
   if (!panel.querySelector(".custom-q-trigger-btn")) {
     var qBtn = document.createElement("button");
     qBtn.className = "custom-q-trigger-btn";
     qBtn.title = "Quality Preferences";
-    qBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3-1.57-3-3.5s1.07-3.5 3-3.5 3 1.57 3 3.5-1.07 3.5-3 3.5z"/></svg>';
+    qBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49-.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3-1.57-3-3.5s1.07-3.5 3-3.5 3 1.57 3 3.5-1.07 3.5-3 3.5z"/></svg>';
     qBtn.addEventListener("click", function(e) {
       e.stopPropagation();
       if (isInterfaceLocked) return;
-      buildYoutubeQualityMenu(player);
+      buildYoutubeQualityMenu(globalPlayer);
       qMenuEl.classList.toggle("show");
     });
     panel.appendChild(qBtn);
   }
 
-  // FIT MODE TOGGLE BUTTON
   if (!panel.querySelector(".shaka-fit-btn")) {
     var modeIdx = 0;
     var fitBtn = document.createElement("button");
@@ -1374,7 +1496,6 @@ function injectCustomControls(container, video, player) {
     });
   }
 
-  // CUSTOM FULLSCREEN BUTTON
   if (!panel.querySelector(".shaka-custom-fs-btn")) {
     var customFsBtn = document.createElement("button");
     customFsBtn.className = "shaka-custom-fs-btn";
@@ -1407,6 +1528,22 @@ function injectCustomControls(container, video, player) {
   container.addEventListener("click", function() {
     qMenuEl.classList.remove("show");
   });
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      showStatus("Link Copied to Clipboard! \uD83D\uDCCB", "ok", 3000);
+    }).catch(function() {
+      fallbackWindowOpen(text);
+    });
+  } else {
+    fallbackWindowOpen(text);
+  }
+}
+
+function fallbackWindowOpen(text) {
+  window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text), "_blank");
 }
 
 function setupSwipeGestures(targetFrame, video) {
@@ -1460,7 +1597,7 @@ function setupSwipeGestures(targetFrame, video) {
       var nextBright = Math.min(Math.max(startBright + bChange, 10), 100); 
       currentBrightness = nextBright;
       brOverlay.style.opacity = (100 - currentBrightness) / 100;
-      showHud("☀ Brightness: " + Math.round(currentBrightness) + "%");
+      showHud("\u2600 Brightness: " + Math.round(currentBrightness) + "%");
     } 
     else if (mode === "volume") {
       var vChange = -(deltaY / targetFrame.clientHeight) * 2.5; 
@@ -1471,12 +1608,12 @@ function setupSwipeGestures(targetFrame, video) {
         setBoostedVolume(1.0);
         video.volume = dynamicLimit;
         if (dynamicLimit > 0) video.muted = false;
-        showHud("🔊 Volume: " + Math.round(dynamicLimit * 100) + "%");
+        showHud("\uD83D\uDD0A Volume: " + Math.round(dynamicLimit * 100) + "%");
       } else {
         initializeAudioEngine(video);
         video.volume = 1.0; 
         setBoostedVolume(dynamicLimit); 
-        showHud("🔊 Volume Boost: " + Math.round(dynamicLimit * 100) + "% 🔥");
+        showHud("\uD83D\uDD0A Volume Boost: " + Math.round(dynamicLimit * 100) + "% \uD83D\uDD25");
       }
     }
   }, { passive: true });
@@ -1492,10 +1629,10 @@ function setupSwipeGestures(targetFrame, video) {
 
       if (touchX > screenWidth / 2) {
         video.currentTime += 10;
-        showHud("⏩ +10s");
+        showHud("\u23E9 +10s");
       } else {
         video.currentTime -= 10;
-        showHud("⏪ -10s");
+        showHud("\u23EA -10s");
       }
     }
     lastTapTime = currentTime;
@@ -1504,7 +1641,6 @@ function setupSwipeGestures(targetFrame, video) {
   });
 }
 
-// KEYBOARD SHORTCUTS FOR PC USERS
 document.addEventListener("keydown", function(e) {
   if (isInterfaceLocked) return;
   if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName)) return;
@@ -1518,7 +1654,7 @@ document.addEventListener("keydown", function(e) {
       break;
     case "m":
       vidEl.muted = !vidEl.muted;
-      showStatus(vidEl.muted ? "Muted 🔇" : "Unmuted 🔊", "ok", 1500);
+      showStatus(vidEl.muted ? "Muted \uD83D\uDD07" : "Unmuted \uD83D\uDD0A", "ok", 1500);
       break;
     case "f":
       if (!document.fullscreenElement) {
@@ -1531,48 +1667,34 @@ document.addEventListener("keydown", function(e) {
       break;
     case "arrowright":
       vidEl.currentTime += 5;
-      showStatus("⏩ +5s", "ok", 1000);
+      showStatus("\u23E9 +5s", "ok", 1000);
       break;
     case "arrowleft":
       vidEl.currentTime -= 5;
-      showStatus("⏪ -5s", "ok", 1000);
+      showStatus("\u23EA -5s", "ok", 1000);
       break;
   }
 });
 
-async function startPlayer(ch) {
-  pcEl.style.display = "flex";
-  listEl.style.display = "none";
+async function initGlobalPlayerOnce() {
+  if (globalPlayer) return globalPlayer;
+
   shaka.polyfill.installAll();
-
   if (!shaka.Player.isBrowserSupported()) {
-    showErrorMsg("Browser not supported.");
-    return;
-  }
-
-  var playerLogo = document.querySelector(".channel-logo-overlay");
-  if (playerLogo) {
-    playerLogo.src = CUSTOM_LOGO;
-  }
-
-  setLoadMsg("Fetching structural cookies...");
-  var masterConfig = await buildPlayerConfigs(ch.id);
-  if (!masterConfig || !masterConfig.url) {
-    showErrorMsg("Error: Channel pipeline not resolved!");
-    return;
+    throw new Error("Browser not supported.");
   }
 
   var player = new shaka.Player();
-  globalPlayer = player;
   await player.attach(vidEl);
 
   var ui = new shaka.ui.Overlay(player, pcEl, vidEl);
-  globalUi = ui;
-
   ui.configure({
     controlPanelElements: ["play_pause", "mute", "volume", "time_and_duration", "spacer", "cast"],
     seekBarColors: { base: "rgba(255,255,255,0.15)", buffered: "rgba(56,189,248,0.4)", played: "#38bdf8" }
   });
+
+  globalPlayer = player;
+  globalUi = ui;
 
   setTimeout(function () { 
     injectCustomControls(pcEl, vidEl, player); 
@@ -1580,39 +1702,59 @@ async function startPlayer(ch) {
     initLiveChat();
   }, 150);
 
-  function buildConfigObj(cfg) {
-    var baseCfg = {
-      manifest: {
-        defaultPresentationDelay: 3, 
-        ignoreTextStreamFailures: true,
-        retryParameters: { maxAttempts: 5, baseDelay: 800, backoffFactor: 1.3, fuzzFactor: 0.1 }
-      },
-      streaming: {
-        lowLatencyMode:              false,
-        bufferingGoal:               5,  
-        rebufferingGoal:             1.2,
-        safeSeekOffset:              3,
-        stallEnabled:                true,
-        stallThreshold:              1,
-        stallSkip:                   0.5,
-        inaccurateManifestTolerance: 0,
-        retryParameters: { maxAttempts: 5, baseDelay: 800, backoffFactor: 1.3, fuzzFactor: 0.1 }
-      },
-      abr: {
-        enabled: true,
-        defaultBandwidthEstimate: 250000, 
-        switchInterval: 2,
-        restrictions: { maxHeight: 1080 }
-      }
-    };
-    if (cfg.keyId && cfg.key) {
-      baseCfg.drm = { clearKeys: { [cfg.keyId]: cfg.key } };
+  return globalPlayer;
+}
+
+function buildConfigObj(cfg) {
+  var baseCfg = {
+    manifest: {
+      defaultPresentationDelay: 3, 
+      ignoreTextStreamFailures: true,
+      retryParameters: { maxAttempts: 5, baseDelay: 800, backoffFactor: 1.3, fuzzFactor: 0.1 }
+    },
+    streaming: {
+      lowLatencyMode:              false,
+      bufferingGoal:               5,  
+      rebufferingGoal:             1.2,
+      safeSeekOffset:              3,
+      stallEnabled:                true,
+      stallThreshold:              1,
+      stallSkip:                   0.5,
+      inaccurateManifestTolerance: 0,
+      retryParameters: { maxAttempts: 5, baseDelay: 800, backoffFactor: 1.3, fuzzFactor: 0.1 }
+    },
+    abr: {
+      enabled: true,
+      defaultBandwidthEstimate: 250000, 
+      switchInterval: 2,
+      restrictions: { maxHeight: 1080 }
     }
-    return baseCfg;
+  };
+  if (cfg.keyId && cfg.key) {
+    baseCfg.drm = { clearKeys: { [cfg.keyId]: cfg.key } };
+  }
+  return baseCfg;
+}
+
+async function loadChannel(ch) {
+  pcEl.style.display = "flex";
+  listEl.style.display = "none";
+
+  var playerLogo = document.querySelector(".channel-logo-overlay");
+  if (playerLogo) playerLogo.src = CUSTOM_LOGO;
+
+  setLoadMsg("Fetching structural cookies...");
+  var masterConfig = await buildPlayerConfigs(ch.id);
+  
+  if (!masterConfig || !masterConfig.url) {
+    showStatus("Channel offline/failed, switching to next...", "warn", 2000);
+    switchToNextChannel(ch.id);
+    return;
   }
 
-  var isPlayed = false;
+  var player = await initGlobalPlayerOnce();
 
+  var isPlayed = false;
   for (var i = 0; i < masterConfig.cookies.length; i++) {
     var activeCookie = masterConfig.cookies[i];
     var activeRaw = extractRawCookie(activeCookie);
@@ -1634,9 +1776,7 @@ async function startPlayer(ch) {
       await player.load(masterConfig.url);
       vidEl.play().then(function() {
         showStatus("Live Connected!", "ok", 4000);
-      }).catch(function () {
-        console.log("Autoplay blocked, waiting for Tap gate.");
-      });
+      }).catch(function () {});
       isPlayed = true;
       hideOverlay();
       break;
@@ -1646,24 +1786,19 @@ async function startPlayer(ch) {
   }
 
   if (!isPlayed) {
-    hideOverlay();
-    showStatus("Playback Error: Verification Failed!", "err", 0);
+    showStatus("Stream failed! Auto-switching channel...", "err", 2000);
+    switchToNextChannel(ch.id);
     return;
   }
 
-  tapGate.className = ""; 
-  tapGate.addEventListener("click", function () {
+  // FIX: Check if user has already interacted anywhere on the page
+  if (userHasInteracted) {
     tapGate.classList.add("hidden");
-    vidEl.muted = false; 
-    if (vidEl.paused) vidEl.play().catch(function () {});
-
-    setTimeout(function() {
-      var waPopup = document.getElementById('waPopup');
-      if (waPopup) {
-        waPopup.classList.add('show');
-      }
-    }, 500);
-  }, { once: true });
+    vidEl.muted = false;
+  } else {
+    tapGate.classList.remove("hidden");
+    vidEl.muted = true;
+  }
 
   player.addEventListener("trackschanged", function() {
     buildYoutubeQualityMenu(player);
@@ -1687,10 +1822,13 @@ async function startPlayer(ch) {
 
   async function refreshAndReload() {
     if (isRefreshing) return;
-    if (refreshCount >= 4) {
-      showStatus("Stream unavailable.", "err", 0);
+    
+    if (refreshCount >= 2) {
+      showStatus("Stream down. Auto-switching to next channel...", "err", 2000);
+      switchToNextChannel(ch.id);
       return;
     }
+
     isRefreshing = true;
     refreshCount++;
     showStatus("Refreshing cluster...", "warn", 0);
@@ -1703,12 +1841,12 @@ async function startPlayer(ch) {
 
       player.configure(buildConfigObj(masterConfig));
       player.getNetworkingEngine().clearAllRequestFilters();
-      player.getNetworkingEngine().registerRequestFilter(function (type, req) {
+      player.getNetworkingEngine().registerRequestFilter(function(type, req) {
         req.headers["Referer"]    = "https://www.jiotv.com/";
         req.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6";
         if (targetCookie) req.headers["Cookie"] = targetCookie;
         if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
-          if (targetRaw) req.uris = req.uris.map(function (u) { return appendCookieToUri(u, targetRaw); });
+          if (targetRaw) req.uris = req.uris.map(function(u) { return appendCookieToUri(u, targetRaw); });
         }
       });
 
@@ -1731,7 +1869,8 @@ async function startPlayer(ch) {
     if (RECOVERABLE.indexOf(code) !== -1) {
       refreshAndReload();
     } else {
-      showStatus(shakaErrStr(err), "err", 6000);
+      showStatus("Playback error! Switching channel...", "err", 2000);
+      switchToNextChannel(ch.id);
     }
   });
 
@@ -1754,31 +1893,59 @@ async function startPlayer(ch) {
   vidEl.addEventListener("waiting", onStall);
   vidEl.addEventListener("stalled", onStall);
   vidEl.addEventListener("playing", onPlaying);
-
-  document.addEventListener("visibilitychange", function () {
-    if (!document.hidden && vidEl.paused && !isRefreshing) {
-      vidEl.play().catch(function () { refreshAndReload(); });
-    }
+  
+  // FIX: Fallback Popup triggers strictly check if tap-gate is hidden!
+  vidEl.addEventListener("playing", function() {
+    if (!vidEl.muted && vidEl.volume > 0 && tapGate.classList.contains("hidden")) triggerPopup();
+  });
+  vidEl.addEventListener("volumechange", function() {
+    if (!vidEl.muted && vidEl.volume > 0 && !vidEl.paused && tapGate.classList.contains("hidden")) triggerPopup();
   });
 }
 
-async function main() {
-  var pX = document.getElementById('popupX');
-  var pJ = document.getElementById('popupJoin');
-  var pA = document.getElementById('popupAlready');
-  if (pX) pX.onclick = closePopup;
-  if (pJ) pJ.onclick = closePopup;
-  if (pA) pA.onclick = closePopup;
+async function switchToNextChannel(currentFailedId) {
+  if (!cachedChannels || cachedChannels.length === 0) {
+    try {
+      cachedChannels = await fetchInitialChannelList();
+    } catch(e) {
+      showErrorMsg("All streams offline. Please check back later.");
+      return;
+    }
+  }
 
+  var currentIndex = cachedChannels.findIndex(function(c) { return String(c.id) === String(currentFailedId); });
+  var nextIndex = 0;
+  
+  if (currentIndex !== -1 && cachedChannels.length > 1) {
+    nextIndex = (currentIndex + 1) % cachedChannels.length;
+  }
+  
+  var nextCh = cachedChannels[nextIndex];
+  if (nextCh) {
+    var targetUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?id=" + encodeURIComponent(nextCh.id);
+    window.history.pushState({ id: nextCh.id }, '', targetUrl);
+    document.title = nextCh.name;
+
+    if(overlayEl) overlayEl.style.display = "flex";
+    setLoadMsg("Auto-switching to: " + nextCh.name + "...");
+
+    var switcher = document.querySelector(".custom-feed-switcher");
+    if(switcher) switcher.value = nextCh.id;
+
+    await loadChannel(nextCh);
+  } else {
+    showErrorMsg("No alternative channel available.");
+  }
+}
+
+async function main() {
   var channelId = getChannelId();
 
-  // FAST DIRECT PLAYER STARTUP
   if (channelId) {
     var ch = { id: channelId, name: "Live Stream (" + channelId + ")", logo: CUSTOM_LOGO };
     document.title = ch.name;
-    startPlayer(ch);
+    loadChannel(ch);
 
-    // FETCH CATALOG IN BACKGROUND
     fetchInitialChannelList().then(function(list) {
       cachedChannels = list;
       var found = list.find(function(c) { return c.id === channelId; });
