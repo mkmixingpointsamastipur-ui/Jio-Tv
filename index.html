@@ -32,19 +32,6 @@ body.data-saver-active #overlay svg, body.data-saver-active .rgb-popup-box {anim
 .ch-fav-star.active{color:#ffcc00} 
 #pc{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;background:#000!important;display:none;z-index:9990!important;align-items:center;justify-content:center;touch-action:none} 
 
-/* Ambient Lighting Glow Canvas */
-#ambient-canvas {
-  position: absolute;
-  inset: -20px;
-  width: calc(100% + 40px);
-  height: calc(100% + 40px);
-  filter: blur(50px) brightness(1.2) opacity(0.6);
-  z-index: 9989;
-  pointer-events: none;
-  transition: opacity 0.5s ease;
-}
-body.data-saver-active #ambient-canvas { display: none !important; }
-
 .shaka-video-container {width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;position:relative!important;overflow:hidden;} 
 video, .shaka-video{width:100vw!important;height:100vh!important;object-fit:contain;background:#000000!important;will-change:transform;crossorigin:anonymous!important;transform-origin:center center;transition:transform 0.05s ease-out;} 
 video.mode-fill{object-fit:fill!important} 
@@ -151,7 +138,6 @@ video.mode-cover{object-fit:cover!important}
 </div> 
 
 <div id="pc"> 
-<canvas id="ambient-canvas"></canvas>
 <div id="stats-hud"> 
 <h3>📊 Stats for Nerds</h3> 
 <div>Viewport: <span id="st-res">0x0</span></div> 
@@ -275,7 +261,7 @@ var FIT_ICONS = {
 var userHasInteracted = false; 
 var isDataSaverEnabled = false;
 
-// Data Saver Mode Controller
+// Data Saver Controller
 var dataSaverBtn = document.getElementById("data-saver-toggle");
 if(dataSaverBtn) {
   dataSaverBtn.addEventListener("click", function() {
@@ -294,27 +280,11 @@ if(dataSaverBtn) {
   });
 }
 
-// Ambient Glow Lighting Engine
-function initAmbientGlow() {
-  var ambientCanvas = document.getElementById("ambient-canvas");
-  if (!ambientCanvas) return;
-  var ctx = ambientCanvas.getContext("2d", { willReadFrequently: false });
-
-  setInterval(function() {
-    if (vidEl.paused || vidEl.ended || isDataSaverEnabled || pcEl.style.display !== "flex") return;
-    try {
-      ambientCanvas.width = 32;
-      ambientCanvas.height = 18;
-      ctx.drawImage(vidEl, 0, 0, 32, 18);
-    } catch(e) {}
-  }, 66); // ~15 FPS sync loop
-}
-
-// Network Speed Auto-Detector & Health Monitor
+// Network Speed Auto-Detector
 function initNetworkMonitor() {
   if (navigator.connection) {
     var checkSpeed = function() {
-      var speed = navigator.connection.downlink; // in Mbps
+      var speed = navigator.connection.downlink;
       if (speed && speed < 1.2) {
         showStatus("Low Network Detected - Auto switching to SD quality", "warn", 4000);
         if (globalPlayer && !isDataSaverEnabled) {
@@ -400,7 +370,6 @@ function ensureVideoPlaying() {
   }
 }
 
-// FIX: Popup only shows when Video Player (#pc) is active/playing
 function triggerPopup() { 
   var channelId = getChannelId();
   if (waPopup && channelId && pcEl.style.display === "flex") {
@@ -1398,7 +1367,6 @@ async function initGlobalPlayerOnce() {
     injectCustomControls(pcEl, vidEl, player); 
     setupSwipeAndZoomGestures(pcEl, vidEl); 
     initLiveChat(); 
-    initAmbientGlow();
     initNetworkMonitor();
   }, 150); 
   return globalPlayer; 
