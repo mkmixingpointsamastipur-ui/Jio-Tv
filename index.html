@@ -45,7 +45,7 @@ video.audio-only-active { display: none !important; }
   left: 0px !important;
   width: 100% !important;
   background: rgba(12, 12, 16, 0.96) !important;
-  border-top: 1px solid rgba(56, 189, 248, 0.25);
+  border-top: 1px solid rgba(56, 189, 248, 0.3);
   border-radius: 20px 20px 0 0;
   padding: 16px 20px 30px 20px;
   display: none;
@@ -53,15 +53,16 @@ video.audio-only-active { display: none !important; }
   gap: 12px;
   z-index: 20000 !important;
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   max-height: 75vh;
   overflow-y: auto;
 }
 #settings-panel.show { display: flex; }
-#settings-panel h2 { color: #fff; font-size: 15px; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
-.sett-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; color: #e5e5e5; font-size: 13px; }
-.sett-row select { background: #1a1a24; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 6px; outline: none; font-size: 12px; min-width: 120px; }
+#settings-panel h2 { color: #fff; font-size: 15px; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; align-items: center; }
+#settings-panel h2 span.close-sett { cursor: pointer; color: #f87171; font-size: 18px; }
+.sett-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; color: #e5e5e5; font-size: 13px; }
+.sett-row select { background: #1a1a24; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 6px; outline: none; font-size: 12px; max-width: 160px; }
 
 /* Switch Toggle Styling */
 .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
@@ -174,22 +175,26 @@ input:checked + .slider:before { transform: translateX(20px); }
 </div> 
 
 <div id="settings-panel">
-  <h2>⚙️ Player Settings</h2>
+  <h2><span>⚙️ Player Settings</span> <span class="close-sett" id="close-sett-panel">✖</span></h2>
   <div class="sett-row">
     <span>🎥 Video Quality</span>
-    <select id="video-quality-select"><option value="auto">Auto</option></select>
+    <select id="video-quality-select"><option value="auto">Auto (Default)</option></select>
   </div>
   <div class="sett-row">
-    <span>📺 Screen Fit Mode</span>
-    <select id="screen-fit-select">
-      <option value="contain">Fit (Default)</option>
+    <span>📺 Aspect Ratio / Fit</span>
+    <select id="aspect-ratio-select">
+      <option value="contain">Default (Contain)</option>
       <option value="fill">Fill (Stretch)</option>
       <option value="cover">Crop (Zoom)</option>
     </select>
   </div>
   <div class="sett-row">
+    <span>🎙️ Audio Language</span>
+    <select id="audio-lang-select"><option value="auto">Auto (Default)</option></select>
+  </div>
+  <div class="sett-row">
     <span>⏩ Playback Speed</span>
-    <select id="speed-select">
+    <select id="playback-speed-select">
       <option value="0.75">0.75x</option>
       <option value="1.0" selected>1.0x (Normal)</option>
       <option value="1.25">1.25x</option>
@@ -198,11 +203,7 @@ input:checked + .slider:before { transform: translateX(20px); }
     </select>
   </div>
   <div class="sett-row">
-    <span>🎙️ Audio Language</span>
-    <select id="audio-lang-select"><option value="auto">Auto (Default)</option></select>
-  </div>
-  <div class="sett-row">
-    <span>📻 Audio Only Mode</span>
+    <span>📻 Audio Only / Pocket Mode</span>
     <label class="switch">
       <input type="checkbox" id="audio-only-toggle">
       <span class="slider"></span>
@@ -327,37 +328,42 @@ var FIT_ICONS = {
 var userHasInteracted = false; 
 var isDataSaverEnabled = false;
 
-// Settings Panel Controls
+// Settings Panel Controller
 document.addEventListener("DOMContentLoaded", function() {
   var qualSelect = document.getElementById("video-quality-select");
-  var fitSelect = document.getElementById("screen-fit-select");
-  var speedSelect = document.getElementById("speed-select");
+  var aspectSelect = document.getElementById("aspect-ratio-select");
   var langSelect = document.getElementById("audio-lang-select");
+  var speedSelect = document.getElementById("playback-speed-select");
   var audioOnlyToggle = document.getElementById("audio-only-toggle");
   var nightModeToggle = document.getElementById("night-mode-toggle");
+  var closeSett = document.getElementById("close-sett-panel");
 
+  if(closeSett) closeSett.onclick = function() { settPanel.classList.remove("show"); };
+
+  // Video Quality Strict Lock Handler
   if(qualSelect) {
     qualSelect.addEventListener("change", function(e) {
       if (!globalPlayer) return;
       var val = e.target.value;
       if (val === "auto") {
         globalPlayer.configure({ abr: { enabled: true } });
-        showStatus("Quality Mode: Auto ABR", "ok", 2000);
+        showStatus("Quality: Auto (Adaptive)", "ok", 2000);
       } else {
-        var targetHeight = parseInt(val, 10);
-        globalPlayer.configure({ abr: { enabled: false } });
-        var tracks = globalPlayer.getVariantTracks().filter(t => t.height === targetHeight);
+        var h = parseInt(val, 10);
+        var tracks = globalPlayer.getVariantTracks().filter(t => t.height === h);
         if (tracks.length > 0) {
-          globalPlayer.selectVariantTrack(tracks[0], true);
-          showStatus("Quality Forced: " + targetHeight + "p", "ok", 2000);
+          globalPlayer.configure({ abr: { enabled: false } });
+          globalPlayer.selectVariantTrack(tracks[0], true, 0); // Strict track lock + buffer flush
+          showStatus("Quality Locked: " + h + "p", "ok", 2500);
         }
       }
       settPanel.classList.remove("show");
     });
   }
 
-  if(fitSelect) {
-    fitSelect.addEventListener("change", function(e) {
+  // Aspect Ratio Mode Handler
+  if(aspectSelect) {
+    aspectSelect.addEventListener("change", function(e) {
       var m = e.target.value;
       vidEl.classList.remove("mode-fill", "mode-cover");
       if (m === "fill") vidEl.classList.add("mode-fill");
@@ -367,15 +373,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
-  if(speedSelect) {
-    speedSelect.addEventListener("change", function(e) {
-      var spd = parseFloat(e.target.value);
-      vidEl.playbackRate = spd;
-      showStatus("Playback Speed: " + spd + "x", "ok", 2000);
-      settPanel.classList.remove("show");
-    });
-  }
-
+  // Audio Language Handler
   if(langSelect) {
     langSelect.addEventListener("change", function(e) {
       if (!globalPlayer) return;
@@ -385,12 +383,23 @@ document.addEventListener("DOMContentLoaded", function() {
         showStatus("Audio Language: Auto", "ok", 2000);
       } else {
         globalPlayer.selectAudioLanguage(selectedLang);
-        showStatus("Audio Language Switched: " + selectedLang.toUpperCase(), "ok", 2000);
+        showStatus("Audio Language: " + selectedLang.toUpperCase(), "ok", 2000);
       }
       settPanel.classList.remove("show");
     });
   }
 
+  // Playback Speed Handler
+  if(speedSelect) {
+    speedSelect.addEventListener("change", function(e) {
+      var speed = parseFloat(e.target.value);
+      vidEl.playbackRate = speed;
+      showStatus("Speed Set: " + speed + "x", "ok", 2000);
+      settPanel.classList.remove("show");
+    });
+  }
+
+  // Audio Only Toggle
   if(audioOnlyToggle) {
     audioOnlyToggle.addEventListener("change", function(e) {
       var isAudioOnly = e.target.checked;
@@ -400,6 +409,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 
+  // Night Mode Voice Equalizer
   if(nightModeToggle) {
     nightModeToggle.addEventListener("change", function(e) {
       var isNight = e.target.checked;
@@ -416,7 +426,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-// Populate Settings Options (Quality & Languages)
+// Update Settings Options (Quality & Languages)
 function populateSettingsMenu(player) {
   var qualSelect = document.getElementById("video-quality-select");
   var langSelect = document.getElementById("audio-lang-select");
@@ -430,10 +440,16 @@ function populateSettingsMenu(player) {
     });
     heights.sort((a, b) => b - a);
 
-    qualSelect.innerHTML = '<option value="auto">Auto</option>';
+    var currentConfig = player.getConfiguration();
+    var isAuto = currentConfig.abr.enabled;
+    qualSelect.innerHTML = '<option value="auto"' + (isAuto ? ' selected' : '') + '>Auto (Default)</option>';
+    
     heights.forEach(function(h) {
+      var activeTrack = tracks.find(t => t.active && t.height === h);
+      var isSel = !isAuto && activeTrack;
       var opt = document.createElement("option");
       opt.value = h;
+      opt.selected = !!isSel;
       opt.textContent = h + "p" + (h >= 720 ? " HD" : "");
       qualSelect.appendChild(opt);
     });
@@ -979,7 +995,7 @@ function injectCustomControls(container, video, player) {
     var settBtn = document.createElement("button");
     settBtn.className = "shaka-sett-btn";
     settBtn.title = "Settings";
-    settBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.04-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.02.33-.04.64.04.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6-3.6z"/></svg>';
+    settBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.04-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.02.33-.04.64.04.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>';
     settBtn.addEventListener("click", function(e) {
       e.stopPropagation();
       if(isInterfaceLocked) return;
@@ -1513,6 +1529,10 @@ async function initGlobalPlayerOnce() {
     globalPlayer.configure({ abr: { restrictions: { maxHeight: 480 } } });
   }
 
+  // Dynamic Listeners for Track & Quality Sync
+  player.addEventListener("variantchanged", function() { populateSettingsMenu(player); });
+  player.addEventListener("trackschanged", function() { populateSettingsMenu(player); });
+
   setTimeout(function () { 
     injectCustomControls(pcEl, vidEl, player); 
     setupSwipeAndZoomGestures(pcEl, vidEl); 
@@ -1611,7 +1631,6 @@ async function loadChannel(ch) {
     vidEl.muted = true; 
   } 
 
-  player.addEventListener("trackschanged", function() { populateSettingsMenu(player); }); 
   var stallTimer = null; 
   var isRefreshing = false; 
   var refreshCount = 0; 
