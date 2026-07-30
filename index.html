@@ -17,9 +17,10 @@ html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;font-family:
 #overlay p{color:#666;font-size:13px;letter-spacing:.4px;text-align:center;padding:0 20px;font-weight:500} 
 #channel-list{position:fixed;inset:0;background:radial-gradient(circle at top, #14141c 0%, #08080c 100%);z-index:9998;display:none;flex-direction:column;overflow-y:auto;padding:24px 16px} 
 #channel-list h1{color:#fff;font-size:16px;font-weight:600;letter-spacing:.5px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:center} 
-#search-container {width:100%;max-width:400px;margin:0 auto 16px auto;} 
-#ch-search {width:100%;padding:10px 14px;background:#141417;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:13px;outline:none;transition:border-color .2s} 
+#search-container {width:100%;max-width:400px;margin:0 auto 16px auto;display:flex;gap:8px;} 
+#ch-search {flex:1;padding:10px 14px;background:#141417;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:13px;outline:none;transition:border-color .2s} 
 #ch-search:focus {border-color:#38bdf8} 
+#pwa-install-btn {background:#38bdf8;color:#000;border:none;padding:10px 14px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;display:none;}
 #ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px} 
 .ch-card{position:relative;background:rgba(25, 25, 32, 0.6);border:1px solid rgba(255, 255, 255, 0.08);border-radius:14px;padding:12px 10px;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0, 0, 0, 0.3);transition:background .2s,border-color .2s,transform .15s,box-shadow .2s;-webkit-tap-highlight-color:transparent} 
 .ch-card:hover{background:rgba(35, 35, 45, 0.8);border-color:rgba(56, 189, 248, 0.4);transform:translateY(-2px);box-shadow:0 12px 40px rgba(56, 189, 248, 0.15)} 
@@ -28,9 +29,9 @@ html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;font-family:
 .ch-card span{color:#e5e5e5;font-size:12px;font-weight:500;line-height:1.4} 
 .ch-fav-star{position:absolute;top:6px;right:8px;font-size:14px;color:#555;cursor:pointer;transition:color .2s} 
 .ch-fav-star.active{color:#ffcc00} 
-#pc{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;background:#000!important;display:none;z-index:9990!important;align-items:center;justify-content:center;touch-action:manipulation} 
-.shaka-video-container {width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;position:relative!important} 
-video, .shaka-video{width:100vw!important;height:100vh!important;object-fit:contain;background:#000000!important;will-change:auto!important;crossorigin:anonymous!important} 
+#pc{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;background:#000!important;display:none;z-index:9990!important;align-items:center;justify-content:center;touch-action:none} 
+.shaka-video-container {width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;position:relative!important;overflow:hidden;} 
+video, .shaka-video{width:100vw!important;height:100vh!important;object-fit:contain;background:#000000!important;will-change:transform;crossorigin:anonymous!important;transform-origin:center center;transition:transform 0.05s ease-out;} 
 video.mode-fill{object-fit:fill!important} 
 video.mode-cover{object-fit:cover!important} 
 #pc.theater-mode video, #pc.theater-mode .shaka-video { width: 85vw !important; height: 85vh !important; margin: auto; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.9); } 
@@ -127,6 +128,7 @@ video.mode-cover{object-fit:cover!important}
 <h1>Sports Live</h1> 
 <div id="search-container"> 
 <input type="text" id="ch-search" placeholder="🔍 Search channel name..."> 
+<button id="pwa-install-btn">📲 Install App</button>
 </div> 
 <div id="ch-grid"></div> 
 </div> 
@@ -184,6 +186,25 @@ video.mode-cover{object-fit:cover!important}
 <script> 
 (function () { 
 "use strict"; 
+
+// Dynamic Manifest Injection for PWA Support
+(function injectPWAManifest() {
+  var manifest = {
+    name: "Sports Live - RK LINK WALA",
+    short_name: "Sports Live",
+    start_url: "/",
+    display: "standalone",
+    background_color: "#0a0a0a",
+    theme_color: "#38bdf8",
+    icons: [{ src: "https://res.cloudinary.com/dgktl7phy/image/upload/f_auto,q_auto/1001220368_dpkmgi", sizes: "512x512", type: "image/png" }]
+  };
+  var blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+  var link = document.createElement('link');
+  link.rel = 'manifest';
+  link.href = URL.createObjectURL(blob);
+  document.head.appendChild(link);
+})();
+
 var PRIMARY_JSON = 'https://sonujson-v2.pages.dev/loura.json'; 
 var FALLBACK_JSON = 'https://allrounderid2.pages.dev/id.json'; 
 var MY_MAIN_JSON = "https://sonujson-devloper.vercel.app/Data/sports.json"; 
@@ -235,6 +256,46 @@ var FIT_ICONS = {
 }; 
 var userHasInteracted = false; 
 
+// PWA Install Prompt State
+var deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  var pwaBtn = document.getElementById('pwa-install-btn');
+  if(pwaBtn) pwaBtn.style.display = 'block';
+});
+
+var pwaBtn = document.getElementById('pwa-install-btn');
+if(pwaBtn) {
+  pwaBtn.addEventListener('click', function() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(choiceResult) {
+        if (choiceResult.outcome === 'accepted') {
+          showStatus("App Installation Started", "ok", 2500);
+        }
+        deferredPrompt = null;
+        pwaBtn.style.display = 'none';
+      });
+    }
+  });
+}
+
+// Media Session API (Background Audio Control)
+function updateMediaSession(title) {
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: title || "Live Sports",
+      artist: "RK LINK WALA ™",
+      album: "Sports Live",
+      artwork: [{ src: CUSTOM_LOGO, sizes: '512x512', type: 'image/png' }]
+    });
+
+    navigator.mediaSession.setActionHandler('play', function() { vidEl.play(); });
+    navigator.mediaSession.setActionHandler('pause', function() { vidEl.pause(); });
+  }
+}
+
 function unlockGlobalAudio() { 
   if (userHasInteracted) return; 
   userHasInteracted = true; 
@@ -260,7 +321,6 @@ async function enforceAutoLandscape() {
   } catch (err) {} 
 } 
 
-// FIX: Ensure video playing ONLY if not manually paused by user
 function ensureVideoPlaying() {
   if (audioCtx && audioCtx.state === "suspended") {
     audioCtx.resume().catch(function(){});
@@ -877,7 +937,7 @@ function injectCustomControls(container, video, player) {
     var speedBtn = document.createElement("button"); 
     speedBtn.className = "shaka-speed-btn"; 
     speedBtn.title = "Playback Speed"; 
-    speedBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 1 1-14.3 0L3.62 8.57a10 10 0 1 0 16.76 0zM13 5.07V3h-2v2.07a8 8 0 0 0-4.32 2.14l1.41 1.41A6 6 0 0 1 11 7.07V10h2V7.07a6 6 0 0 1 2.91 1.55l1.41-1.41A8 8 0 0 0 13 5.07zM11 12h2l4.5-6.5-1.5-1-5 7.5z"/></svg>'; 
+    speedBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 1 1-14.3 0L3.62 8.57a10 10 0 1 0 16.76 0zM13 5.07V3h-2v2.07a8 8 0 0 0-4.32 2.14l1.41 1.41A6 6 0 0 0 11 7.07V10h2V7.07a6 6 0 0 1 2.91 1.55l1.41-1.41A8 8 0 0 0 13 5.07zM11 12h2l4.5-6.5-1.5-1-5 7.5z"/></svg>'; 
     var speeds = [1.0, 1.5, 2.0]; 
     var currentSpeedIndex = 0; 
     speedBtn.addEventListener("click", function(e) { 
@@ -1061,13 +1121,31 @@ function fallbackWindowOpen(text) {
   window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text), "_blank"); 
 } 
 
-function setupSwipeGestures(targetFrame, video) { 
+// Enhanced Swipe Gestures + Pinch-to-Zoom Engine
+function setupSwipeAndZoomGestures(targetFrame, video) { 
   var startX = 0, startY = 0; 
   var startVol = 1, startBright = 100; 
   var isSwiping = false; 
   var mode = ""; 
   var hudTimeout = null; 
   var lastTapTime = 0; 
+
+  // Zoom & Pan Variables
+  var currentScale = 1;
+  var initialPinchDistance = 0;
+  var startPanX = 0, startPanY = 0;
+  var currentPanX = 0, currentPanY = 0;
+  var isPinching = false;
+
+  function getDistance(t1, t2) {
+    var dx = t1.clientX - t2.clientX;
+    var dy = t1.clientY - t2.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  function applyTransform() {
+    video.style.transform = "scale(" + currentScale + ") translate(" + (currentPanX / currentScale) + "px, " + (currentPanY / currentScale) + "px)";
+  }
 
   function showHud(text) { 
     gestureHud.textContent = text; 
@@ -1079,21 +1157,56 @@ function setupSwipeGestures(targetFrame, video) {
   targetFrame.addEventListener("touchstart", function(e) { 
     unlockGlobalAudio(); 
     if (isInterfaceLocked) return; 
+
+    // Handle 2-Finger Pinch Zoom
+    if (e.touches.length === 2) {
+      isPinching = true;
+      isSwiping = false;
+      initialPinchDistance = getDistance(e.touches[0], e.touches[1]);
+      return;
+    }
+
     if (e.touches.length !== 1) return; 
     var isControlsActive = targetFrame.querySelector(".shaka-controls-container")?.getAttribute("shown") === "true"; 
     if (isControlsActive && e.target.closest(".shaka-controls-button-panel, .shaka-range-container, #custom-q-menu, #live-chat-panel")) return; 
+    
     var touch = e.touches[0]; 
     startX = touch.clientX; 
     startY = touch.clientY; 
     startVol = video.volume; 
     startBright = currentBrightness; 
+    startPanX = touch.clientX - currentPanX;
+    startPanY = touch.clientY - currentPanY;
     isSwiping = true; 
     mode = ""; 
   }, { passive: true }); 
 
   targetFrame.addEventListener("touchmove", function(e) { 
     if (isInterfaceLocked) return; 
-    if (!isSwiping || e.touches.length !== 1) return; 
+
+    // Handle Pinch Zooming
+    if (isPinching && e.touches.length === 2) {
+      var newDistance = getDistance(e.touches[0], e.touches[1]);
+      var factor = newDistance / initialPinchDistance;
+      var newScale = Math.min(Math.max(currentScale * factor, 1), 3);
+      currentScale = newScale;
+      initialPinchDistance = newDistance;
+      applyTransform();
+      showHud("🔍 Zoom: " + currentScale.toFixed(1) + "x");
+      return;
+    }
+
+    // Handle Pan when Zoomed In
+    if (currentScale > 1 && isSwiping && e.touches.length === 1) {
+      var touch = e.touches[0];
+      currentPanX = touch.clientX - startPanX;
+      currentPanY = touch.clientY - startPanY;
+      applyTransform();
+      return;
+    }
+
+    // Normal Volume/Brightness Gestures
+    if (!isSwiping || e.touches.length !== 1 || currentScale > 1) return; 
     var touch = e.touches[0]; 
     var deltaX = touch.clientX - startX; 
     var deltaY = touch.clientY - startY; 
@@ -1130,6 +1243,18 @@ function setupSwipeGestures(targetFrame, video) {
 
   targetFrame.addEventListener("touchend", function(e) { 
     if (isInterfaceLocked) return; 
+
+    if (isPinching) {
+      isPinching = false;
+      if (currentScale <= 1.05) {
+        currentScale = 1;
+        currentPanX = 0;
+        currentPanY = 0;
+        applyTransform();
+      }
+      return;
+    }
+
     var currentTime = new Date().getTime(); 
     var tapInterval = currentTime - lastTapTime; 
     if (tapInterval < 300 && tapInterval > 0 && e.changedTouches && e.changedTouches.length > 0) { 
@@ -1200,7 +1325,7 @@ async function initGlobalPlayerOnce() {
   globalUi = ui; 
   setTimeout(function () { 
     injectCustomControls(pcEl, vidEl, player); 
-    setupSwipeGestures(pcEl, vidEl); 
+    setupSwipeAndZoomGestures(pcEl, vidEl); 
     initLiveChat(); 
   }, 150); 
   return globalPlayer; 
@@ -1270,6 +1395,7 @@ async function loadChannel(ch) {
       vidEl.play().then(function() { 
         showStatus("Live Connected!", "ok", 4000); 
         triggerPopup(); 
+        updateMediaSession(ch.name);
       }).catch(function (e) { 
         console.warn("Autoplay blocked, waiting for touch interaction", e); 
       }); 
@@ -1355,7 +1481,6 @@ async function loadChannel(ch) {
     } 
   }); 
 
-  // FIX: Ignore stall events when video is manually paused
   function onStall() { 
     if (vidEl.paused || stallTimer || isRefreshing) return; 
     showStatus("Buffering...", "warn", 0); 
