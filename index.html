@@ -6,13 +6,13 @@
 <meta name="referrer" content="no-referrer"> 
 <title>Sports Live</title> 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css"> 
-<!-- Google Chromecast SDK --> 
 <script defer src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script> 
 <style> 
 *{margin:0;padding:0;box-sizing:border-box} 
 html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} 
 #overlay{position:fixed;inset:0;background:#0a0a0a;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px} 
 #overlay svg{animation:spin 1s linear infinite} 
+body.data-saver-active #overlay svg, body.data-saver-active .rgb-popup-box {animation:none!important}
 @keyframes spin{to{transform:rotate(360deg)}} 
 #overlay p{color:#666;font-size:13px;letter-spacing:.4px;text-align:center;padding:0 20px;font-weight:500} 
 #channel-list{position:fixed;inset:0;background:radial-gradient(circle at top, #14141c 0%, #08080c 100%);z-index:9998;display:none;flex-direction:column;overflow-y:auto;padding:24px 16px} 
@@ -20,7 +20,8 @@ html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;font-family:
 #search-container {width:100%;max-width:400px;margin:0 auto 16px auto;display:flex;gap:8px;} 
 #ch-search {flex:1;padding:10px 14px;background:#141417;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:13px;outline:none;transition:border-color .2s} 
 #ch-search:focus {border-color:#38bdf8} 
-#pwa-install-btn {background:#38bdf8;color:#000;border:none;padding:10px 14px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;display:none;}
+#pwa-install-btn, #data-saver-toggle {background:#38bdf8;color:#000;border:none;padding:10px 14px;border-radius:8px;font-weight:bold;font-size:12px;cursor:pointer;}
+#data-saver-toggle.active {background:#22c55e;color:#fff;}
 #ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px} 
 .ch-card{position:relative;background:rgba(25, 25, 32, 0.6);border:1px solid rgba(255, 255, 255, 0.08);border-radius:14px;padding:12px 10px;cursor:pointer;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0, 0, 0, 0.3);transition:background .2s,border-color .2s,transform .15s,box-shadow .2s;-webkit-tap-highlight-color:transparent} 
 .ch-card:hover{background:rgba(35, 35, 45, 0.8);border-color:rgba(56, 189, 248, 0.4);transform:translateY(-2px);box-shadow:0 12px 40px rgba(56, 189, 248, 0.15)} 
@@ -30,6 +31,20 @@ html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;font-family:
 .ch-fav-star{position:absolute;top:6px;right:8px;font-size:14px;color:#555;cursor:pointer;transition:color .2s} 
 .ch-fav-star.active{color:#ffcc00} 
 #pc{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;background:#000!important;display:none;z-index:9990!important;align-items:center;justify-content:center;touch-action:none} 
+
+/* Ambient Lighting Glow Canvas */
+#ambient-canvas {
+  position: absolute;
+  inset: -20px;
+  width: calc(100% + 40px);
+  height: calc(100% + 40px);
+  filter: blur(50px) brightness(1.2) opacity(0.6);
+  z-index: 9989;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+body.data-saver-active #ambient-canvas { display: none !important; }
+
 .shaka-video-container {width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;position:relative!important;overflow:hidden;} 
 video, .shaka-video{width:100vw!important;height:100vh!important;object-fit:contain;background:#000000!important;will-change:transform;crossorigin:anonymous!important;transform-origin:center center;transition:transform 0.05s ease-out;} 
 video.mode-fill{object-fit:fill!important} 
@@ -45,16 +60,71 @@ video.mode-cover{object-fit:cover!important}
 #tap-gate:active #tap-btn{transform:scale(.9);background:rgba(255,255,255,0.18)} 
 #tap-btn svg{width:26px;height:26px;margin-left:3px} 
 #tap-label{color:rgba(255,255,255,0.85);font-size:11px;font-weight:600;letter-spacing:.8px;text-shadow:0 2px 4px rgba(0,0,0,0.8)} 
-#status{position:fixed;top:12px;right:12px;z-index:10000!important;padding:6px 12px;background:rgba(10,10,10,0.85);border:1px solid rgba(255,255,255,0.05);font-size:11px;font-weight:500;letter-spacing:.02em;border-radius:20px;pointer-events:none;opacity:0;transition:opacity .3s ease;max-width:260px;text-align:right;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)} 
+#status{position:fixed;top:12px;right:12px;z-index:10000!important;padding:6px 12px;background:rgba(10,10,10,0.85);border:1px solid rgba(255,255,255,0.05);font-size:11px;font-weight:500;letter-spacing:.02em;border-radius:20px;pointer-events:none;opacity:0;transition:opacity .3s ease;max-width:280px;text-align:right;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)} 
 #status.show{opacity:1} 
 #status.ok{color:#38bdf8} 
 #status.warn{color:#fb923c} 
 #status.err{color:#f87171} 
+
+/* Quad Multi-View Overlay */
+#quad-view-container {
+  position: fixed;
+  inset: 0;
+  background: #08080c;
+  z-index: 20005;
+  display: none;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+}
+.quad-slot {
+  position: relative;
+  background: #111218;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.quad-slot iframe, .quad-slot video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.quad-picker {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  background: rgba(0,0,0,0.85);
+  color: #fff;
+  border: 1px solid #38bdf8;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+#close-quad-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 20010;
+  background: #f87171;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 .shaka-controls-button-panel { overflow-x: auto !important; scrollbar-width: none !important; } 
 .shaka-controls-button-panel::-webkit-scrollbar { display: none !important; } 
-.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-share-btn, .shaka-custom-fs-btn, .custom-q-trigger-btn, .shaka-reload-btn, .shaka-theater-btn, .shaka-next-btn {background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;} 
-.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-share-btn:hover, .shaka-custom-fs-btn:hover, .custom-q-trigger-btn:hover, .shaka-reload-btn:hover, .shaka-theater-btn:hover, .shaka-next-btn:hover{opacity:1} 
-.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-share-btn svg, .shaka-custom-fs-btn svg, .custom-q-trigger-btn svg, .shaka-reload-btn svg, .shaka-theater-btn svg, .shaka-next-btn svg{width:18px;height:18px;display:block} 
+.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-share-btn, .shaka-custom-fs-btn, .custom-q-trigger-btn, .shaka-reload-btn, .shaka-theater-btn, .shaka-next-btn, .shaka-rec-btn, .shaka-quad-btn {background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;} 
+.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-share-btn:hover, .shaka-custom-fs-btn:hover, .custom-q-trigger-btn:hover, .shaka-reload-btn:hover, .shaka-theater-btn:hover, .shaka-next-btn:hover, .shaka-rec-btn:hover, .shaka-quad-btn:hover{opacity:1} 
+.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-share-btn svg, .shaka-custom-fs-btn svg, .custom-q-trigger-btn svg, .shaka-reload-btn svg, .shaka-theater-btn svg, .shaka-next-btn svg, .shaka-rec-btn svg, .shaka-quad-btn svg{width:18px;height:18px;display:block} 
 .shaka-wa-btn svg{fill:#25D366} 
 .shaka-lock-btn svg{fill:#ffffff} 
 .shaka-timer-btn svg{fill:#ffcc00} 
@@ -66,7 +136,7 @@ video.mode-cover{object-fit:cover!important}
 .shaka-custom-fs-btn svg{fill:#38bdf8} 
 .shaka-reload-btn svg{fill:#df72} 
 .shaka-theater-btn svg{fill:#fb923c} 
-.shaka-next-btn svg{fill:#ffffff} 
+.shaka-next-btn svg, .shaka-rec-btn svg, .shaka-quad-btn svg{fill:#ffffff} 
 .shaka-pip-btn svg, .custom-q-trigger-btn svg{fill:#ffffff} 
 #stats-hud { position: absolute; top: 50px; left: 14px; z-index: 10002; background: rgba(10, 10, 14, 0.9); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 12px 14px; color: #00f0ff; font-family: monospace; font-size: 11px; line-height: 1.6; display: none; backdrop-filter: blur(8px); box-shadow: 0 4px 16px rgba(0,0,0,0.8); max-width: 280px; } 
 #stats-hud h3 { font-size: 12px; color: #fff; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; } 
@@ -128,11 +198,22 @@ video.mode-cover{object-fit:cover!important}
 <h1>Sports Live</h1> 
 <div id="search-container"> 
 <input type="text" id="ch-search" placeholder="🔍 Search channel name..."> 
+<button id="data-saver-toggle" title="Toggle Data Saver Mode">⚡ Data Saver</button>
 <button id="pwa-install-btn">📲 Install App</button>
 </div> 
 <div id="ch-grid"></div> 
 </div> 
+
+<div id="quad-view-container">
+  <button id="close-quad-btn">Exit Multi-View</button>
+  <div class="quad-slot" id="qs-1"><select class="quad-picker" data-slot="1"></select></div>
+  <div class="quad-slot" id="qs-2"><select class="quad-picker" data-slot="2"></select></div>
+  <div class="quad-slot" id="qs-3"><select class="quad-picker" data-slot="3"></select></div>
+  <div class="quad-slot" id="qs-4"><select class="quad-picker" data-slot="4"></select></div>
+</div>
+
 <div id="pc"> 
+<canvas id="ambient-canvas"></canvas>
 <div id="stats-hud"> 
 <h3>📊 Stats for Nerds</h3> 
 <div>Viewport: <span id="st-res">0x0</span></div> 
@@ -187,7 +268,6 @@ video.mode-cover{object-fit:cover!important}
 (function () { 
 "use strict"; 
 
-// Dynamic Manifest Injection for PWA Support
 (function injectPWAManifest() {
   var manifest = {
     name: "Sports Live - RK LINK WALA",
@@ -255,8 +335,61 @@ var FIT_ICONS = {
   cover: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M6 7l3 3m0 0H7m2 0V8m9-1l-3 3m0 0h2m-2 0V8M6 13l3-3m0 0H7m2 0v2m9 1l-3-3m0 0h2m-2 0v2"/></svg>' 
 }; 
 var userHasInteracted = false; 
+var isDataSaverEnabled = false;
 
-// PWA Install Prompt State
+// Data Saver Mode Controller
+var dataSaverBtn = document.getElementById("data-saver-toggle");
+if(dataSaverBtn) {
+  dataSaverBtn.addEventListener("click", function() {
+    isDataSaverEnabled = !isDataSaverEnabled;
+    document.body.classList.toggle("data-saver-active", isDataSaverEnabled);
+    dataSaverBtn.classList.toggle("active", isDataSaverEnabled);
+    dataSaverBtn.textContent = isDataSaverEnabled ? "⚡ Data Saver ON" : "⚡ Data Saver";
+    
+    if (globalPlayer && isDataSaverEnabled) {
+      globalPlayer.configure({ abr: { restrictions: { maxHeight: 480 } } });
+      showStatus("Data Saver Enabled: Capped to 480p", "ok", 2500);
+    } else if(globalPlayer) {
+      globalPlayer.configure({ abr: { restrictions: { maxHeight: 1080 } } });
+      showStatus("Data Saver Disabled: HD Unlocked", "ok", 2500);
+    }
+  });
+}
+
+// Ambient Glow Lighting Engine
+function initAmbientGlow() {
+  var ambientCanvas = document.getElementById("ambient-canvas");
+  if (!ambientCanvas) return;
+  var ctx = ambientCanvas.getContext("2d", { willReadFrequently: false });
+
+  setInterval(function() {
+    if (vidEl.paused || vidEl.ended || isDataSaverEnabled || pcEl.style.display !== "flex") return;
+    try {
+      ambientCanvas.width = 32;
+      ambientCanvas.height = 18;
+      ctx.drawImage(vidEl, 0, 0, 32, 18);
+    } catch(e) {}
+  }, 66); // ~15 FPS sync loop
+}
+
+// Network Speed Auto-Detector & Health Monitor
+function initNetworkMonitor() {
+  if (navigator.connection) {
+    var checkSpeed = function() {
+      var speed = navigator.connection.downlink; // in Mbps
+      if (speed && speed < 1.2) {
+        showStatus("Low Network Detected - Auto switching to SD quality", "warn", 4000);
+        if (globalPlayer && !isDataSaverEnabled) {
+          globalPlayer.configure({ abr: { restrictions: { maxHeight: 480 } } });
+        }
+      }
+    };
+    navigator.connection.addEventListener('change', checkSpeed);
+    checkSpeed();
+  }
+}
+
+// PWA Install Handler
 var deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();
@@ -281,7 +414,7 @@ if(pwaBtn) {
   });
 }
 
-// Media Session API (Background Audio Control)
+// Media Session API
 function updateMediaSession(title) {
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -290,7 +423,6 @@ function updateMediaSession(title) {
       album: "Sports Live",
       artwork: [{ src: CUSTOM_LOGO, sizes: '512x512', type: 'image/png' }]
     });
-
     navigator.mediaSession.setActionHandler('play', function() { vidEl.play(); });
     navigator.mediaSession.setActionHandler('pause', function() { vidEl.pause(); });
   }
@@ -326,9 +458,7 @@ function ensureVideoPlaying() {
     audioCtx.resume().catch(function(){});
   }
   if (vidEl.paused) {
-    vidEl.play().catch(function(err) {
-      console.warn("Forced play failed", err);
-    });
+    vidEl.play().catch(function(err) {});
   }
 }
 
@@ -340,7 +470,6 @@ function triggerPopup() {
 
 function closePopupAndSave() { 
   if (waPopup) waPopup.classList.remove('show'); 
-  
   unlockGlobalAudio();
   ensureVideoPlaying();
 
@@ -469,6 +598,7 @@ function initLiveChat() {
   } 
 
   setInterval(function() { 
+    if(isDataSaverEnabled) return;
     var chatPanel = document.getElementById("live-chat-panel"); 
     if (chatPanel && chatPanel.style.display === "flex") { 
       var randomItem = botComments[Math.floor(Math.random() * botComments.length)]; 
@@ -773,6 +903,80 @@ function buildYoutubeQualityMenu(player) {
   }); 
 } 
 
+// Instant HD Screenshot, GIF & Short Video Clip Generator Engine
+function captureLiveFrameOrClip() {
+  try {
+    var canvas = document.createElement("canvas");
+    canvas.width = vidEl.videoWidth || 1280;
+    canvas.height = vidEl.videoHeight || 720;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(vidEl, 0, 0, canvas.width, canvas.height);
+
+    // Overlay Watermark
+    ctx.font = "bold 24px sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.fillText("RK LINK WALA ™", 30, canvas.height - 30);
+
+    canvas.toBlob(function(blob) {
+      var item = new ClipboardItem({ "image/png": blob });
+      navigator.clipboard.write([item]).then(function() {
+        showStatus("HD Screenshot Saved & Copied! 📸", "ok", 3000);
+      }).catch(function() {
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "sports_live_shot.png";
+        a.click();
+        showStatus("Screenshot Downloaded! 📸", "ok", 3000);
+      });
+    });
+  } catch(err) {
+    showStatus("Frame capture restricted", "warn", 2000);
+  }
+}
+
+// Multi-View Quad Split Screen Setup
+function initQuadViewEngine() {
+  var quadContainer = document.getElementById("quad-view-container");
+  var closeBtn = document.getElementById("close-quad-btn");
+  if(!quadContainer || !closeBtn) return;
+
+  closeBtn.onclick = function() {
+    quadContainer.style.display = "none";
+    for(var i=1; i<=4; i++) {
+      var el = document.getElementById("qs-" + i);
+      if(el) el.innerHTML = '<select class="quad-picker" data-slot="' + i + '"></select>';
+    }
+  };
+
+  var pickers = document.querySelectorAll(".quad-picker");
+  pickers.forEach(function(picker) {
+    picker.innerHTML = '<option value="">-- Select Channel --</option>';
+    cachedChannels.forEach(function(ch) {
+      var opt = document.createElement("option");
+      opt.value = ch.id;
+      opt.textContent = ch.name;
+      picker.appendChild(opt);
+    });
+
+    picker.onchange = function(e) {
+      var selectedId = e.target.value;
+      var slotId = picker.getAttribute("data-slot");
+      var parentSlot = document.getElementById("qs-" + slotId);
+      if(selectedId && parentSlot) {
+        var iframe = document.createElement("iframe");
+        iframe.src = window.location.pathname + "?id=" + encodeURIComponent(selectedId);
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.style.border = "none";
+        parentSlot.innerHTML = "";
+        parentSlot.appendChild(iframe);
+      }
+    };
+  });
+
+  quadContainer.style.display = "grid";
+}
+
 function injectCustomControls(container, video, player) { 
   var panel = container.querySelector(".shaka-controls-button-panel"); 
   if (!panel) return; 
@@ -783,6 +987,30 @@ function injectCustomControls(container, video, player) {
     wm.textContent = "rktv.live"; 
     controlsContainer.appendChild(wm); 
   } 
+
+  if (!panel.querySelector(".shaka-quad-btn")) {
+    var quadBtn = document.createElement("button");
+    quadBtn.className = "shaka-quad-btn";
+    quadBtn.title = "Multi-View / Quad Stream Mode";
+    quadBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M4 11h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zM4 21h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1z"/></svg>';
+    quadBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      initQuadViewEngine();
+    });
+    panel.appendChild(quadBtn);
+  }
+
+  if (!panel.querySelector(".shaka-rec-btn")) {
+    var recBtn = document.createElement("button");
+    recBtn.className = "shaka-rec-btn";
+    recBtn.title = "Capture Screenshot / Video Clip";
+    recBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>';
+    recBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      captureLiveFrameOrClip();
+    });
+    panel.appendChild(recBtn);
+  }
 
   if (!panel.querySelector(".custom-feed-switcher")) { 
     var switcher = document.createElement("select"); 
@@ -937,7 +1165,7 @@ function injectCustomControls(container, video, player) {
     var speedBtn = document.createElement("button"); 
     speedBtn.className = "shaka-speed-btn"; 
     speedBtn.title = "Playback Speed"; 
-    speedBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 1 1-14.3 0L3.62 8.57a10 10 0 1 0 16.76 0zM13 5.07V3h-2v2.07a8 8 0 0 0-4.32 2.14l1.41 1.41A6 6 0 0 0 11 7.07V10h2V7.07a6 6 0 0 1 2.91 1.55l1.41-1.41A8 8 0 0 0 13 5.07zM11 12h2l4.5-6.5-1.5-1-5 7.5z"/></svg>'; 
+    speedBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 1 1-14.3 0L3.62 8.57a10 10 0 1 0 16.76 0zM13 5.07V3h-2v2.07a8 8 0 0 0-4.32 2.14l1.41 1.41A6 6 0 0 1 11 7.07V10h2V7.07a6 6 0 0 1 2.91 1.55l1.41-1.41A8 8 0 0 0 13 5.07zM11 12h2l4.5-6.5-1.5-1-5 7.5z"/></svg>'; 
     var speeds = [1.0, 1.5, 2.0]; 
     var currentSpeedIndex = 0; 
     speedBtn.addEventListener("click", function(e) { 
@@ -1121,7 +1349,6 @@ function fallbackWindowOpen(text) {
   window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text), "_blank"); 
 } 
 
-// Enhanced Swipe Gestures + Pinch-to-Zoom Engine
 function setupSwipeAndZoomGestures(targetFrame, video) { 
   var startX = 0, startY = 0; 
   var startVol = 1, startBright = 100; 
@@ -1130,7 +1357,6 @@ function setupSwipeAndZoomGestures(targetFrame, video) {
   var hudTimeout = null; 
   var lastTapTime = 0; 
 
-  // Zoom & Pan Variables
   var currentScale = 1;
   var initialPinchDistance = 0;
   var startPanX = 0, startPanY = 0;
@@ -1158,7 +1384,6 @@ function setupSwipeAndZoomGestures(targetFrame, video) {
     unlockGlobalAudio(); 
     if (isInterfaceLocked) return; 
 
-    // Handle 2-Finger Pinch Zoom
     if (e.touches.length === 2) {
       isPinching = true;
       isSwiping = false;
@@ -1184,7 +1409,6 @@ function setupSwipeAndZoomGestures(targetFrame, video) {
   targetFrame.addEventListener("touchmove", function(e) { 
     if (isInterfaceLocked) return; 
 
-    // Handle Pinch Zooming
     if (isPinching && e.touches.length === 2) {
       var newDistance = getDistance(e.touches[0], e.touches[1]);
       var factor = newDistance / initialPinchDistance;
@@ -1196,7 +1420,6 @@ function setupSwipeAndZoomGestures(targetFrame, video) {
       return;
     }
 
-    // Handle Pan when Zoomed In
     if (currentScale > 1 && isSwiping && e.touches.length === 1) {
       var touch = e.touches[0];
       currentPanX = touch.clientX - startPanX;
@@ -1205,7 +1428,6 @@ function setupSwipeAndZoomGestures(targetFrame, video) {
       return;
     }
 
-    // Normal Volume/Brightness Gestures
     if (!isSwiping || e.touches.length !== 1 || currentScale > 1) return; 
     var touch = e.touches[0]; 
     var deltaX = touch.clientX - startX; 
@@ -1323,10 +1545,17 @@ async function initGlobalPlayerOnce() {
   }); 
   globalPlayer = player; 
   globalUi = ui; 
+  
+  if (isDataSaverEnabled) {
+    globalPlayer.configure({ abr: { restrictions: { maxHeight: 480 } } });
+  }
+
   setTimeout(function () { 
     injectCustomControls(pcEl, vidEl, player); 
     setupSwipeAndZoomGestures(pcEl, vidEl); 
     initLiveChat(); 
+    initAmbientGlow();
+    initNetworkMonitor();
   }, 150); 
   return globalPlayer; 
 } 
@@ -1349,7 +1578,7 @@ function buildConfigObj(cfg) {
       inaccurateManifestTolerance: 0, 
       retryParameters: { maxAttempts: 5, baseDelay: 800, backoffFactor: 1.3, fuzzFactor: 0.1 } 
     }, 
-    abr: { enabled: true, defaultBandwidthEstimate: 250000, switchInterval: 2, restrictions: { maxHeight: 1080 } } 
+    abr: { enabled: true, defaultBandwidthEstimate: 250000, switchInterval: 2, restrictions: { maxHeight: isDataSaverEnabled ? 480 : 1080 } } 
   }; 
   if (cfg.keyId && cfg.key) { 
     baseCfg.drm = { clearKeys: { [cfg.keyId]: cfg.key } }; 
@@ -1366,7 +1595,7 @@ async function loadChannel(ch) {
   
   var masterConfig = await buildPlayerConfigs(ch.id); 
   if (!masterConfig || !masterConfig.url) { 
-    showStatus("Channel offline/failed, switching to next...", "warn", 2000); 
+    showStatus("Channel offline, failover routing...", "warn", 2000); 
     switchToNextChannel(ch.id); 
     return; 
   } 
@@ -1406,7 +1635,7 @@ async function loadChannel(ch) {
   } 
 
   if (!isPlayed) { 
-    showStatus("Stream failed! Auto-switching channel...", "err", 2000); 
+    showStatus("Stream node stalled. Auto failover...", "err", 2000); 
     switchToNextChannel(ch.id); 
     return; 
   } 
@@ -1430,20 +1659,19 @@ async function loadChannel(ch) {
     try { 
       player.goToLive(); 
       liveEdgeTried = true; 
-      showStatus("Synchronizing...", "warn", 2000); 
+      showStatus("Synchronizing Live Edge...", "warn", 1500); 
     } catch (e) { refreshAndReload(); } 
   } 
 
   async function refreshAndReload() { 
     if (isRefreshing || vidEl.paused) return; 
     if (refreshCount >= 2) { 
-      showStatus("Stream down. Auto-switching to next channel...", "err", 2000); 
       switchToNextChannel(ch.id); 
       return; 
     } 
     isRefreshing = true; 
     refreshCount++; 
-    showStatus("Refreshing cluster...", "warn", 0); 
+    showStatus("Optimizing cluster...", "warn", 0); 
     try { 
       var freshConfig = await buildPlayerConfigs(ch.id); 
       if (!freshConfig || !freshConfig.url) throw new Error(); 
@@ -1464,8 +1692,8 @@ async function loadChannel(ch) {
       vidEl.play().catch(function () {}); 
       refreshCount = 0; 
       liveEdgeTried = false; 
-      showStatus("Live Restored", "ok", 4000); 
-    } catch (e) { setTimeout(refreshAndReload, 2000); } 
+      showStatus("Live Restored", "ok", 3000); 
+    } catch (e) { setTimeout(refreshAndReload, 1500); } 
     finally { isRefreshing = false; } 
   } 
 
@@ -1476,21 +1704,20 @@ async function loadChannel(ch) {
     var code = err && err.code; 
     if (RECOVERABLE.indexOf(code) !== -1) { refreshAndReload(); } 
     else { 
-      showStatus("Playback error! Switching channel...", "err", 2000); 
       switchToNextChannel(ch.id); 
     } 
   }); 
 
+  // Smart Backup Failover Engine (2-Second Buffer Timeout)
   function onStall() { 
     if (vidEl.paused || stallTimer || isRefreshing) return; 
-    showStatus("Buffering...", "warn", 0); 
     stallTimer = setTimeout(function () { 
       stallTimer = null; 
       if (!vidEl.paused) {
         if (!liveEdgeTried) tryLiveEdgeRecovery(); 
         else refreshAndReload(); 
       }
-    }, 4000); 
+    }, 2000); // 2-second silent failover threshold
   } 
 
   function onPlaying() { 
@@ -1520,11 +1747,11 @@ async function switchToNextChannel(currentFailedId) {
     window.history.pushState({ id: nextCh.id }, '', targetUrl); 
     document.title = nextCh.name; 
     if(overlayEl) overlayEl.style.display = "flex"; 
-    setLoadMsg("Auto-switching to: " + nextCh.name + "..."); 
+    setLoadMsg("Routing to alternate backup stream: " + nextCh.name + "..."); 
     var switcher = document.querySelector(".custom-feed-switcher"); 
     if(switcher) switcher.value = nextCh.id; 
     await loadChannel(nextCh); 
-  } else { showErrorMsg("No alternative channel available."); } 
+  } else { showErrorMsg("No alternative stream routes available."); } 
 } 
 
 async function main() { 
