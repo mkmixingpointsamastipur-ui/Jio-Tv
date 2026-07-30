@@ -66,65 +66,11 @@ video.mode-cover{object-fit:cover!important}
 #status.warn{color:#fb923c} 
 #status.err{color:#f87171} 
 
-/* Quad Multi-View Overlay */
-#quad-view-container {
-  position: fixed;
-  inset: 0;
-  background: #08080c;
-  z-index: 20005;
-  display: none;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 4px;
-  padding: 4px;
-}
-.quad-slot {
-  position: relative;
-  background: #111218;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.quad-slot iframe, .quad-slot video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-.quad-picker {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 10;
-  background: rgba(0,0,0,0.85);
-  color: #fff;
-  border: 1px solid #38bdf8;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 11px;
-}
-#close-quad-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 20010;
-  background: #f87171;
-  color: #fff;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
 .shaka-controls-button-panel { overflow-x: auto !important; scrollbar-width: none !important; } 
 .shaka-controls-button-panel::-webkit-scrollbar { display: none !important; } 
-.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-share-btn, .shaka-custom-fs-btn, .custom-q-trigger-btn, .shaka-reload-btn, .shaka-theater-btn, .shaka-next-btn, .shaka-rec-btn, .shaka-quad-btn {background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;} 
-.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-share-btn:hover, .shaka-custom-fs-btn:hover, .custom-q-trigger-btn:hover, .shaka-reload-btn:hover, .shaka-theater-btn:hover, .shaka-next-btn:hover, .shaka-rec-btn:hover, .shaka-quad-btn:hover{opacity:1} 
-.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-share-btn svg, .shaka-custom-fs-btn svg, .custom-q-trigger-btn svg, .shaka-reload-btn svg, .shaka-theater-btn svg, .shaka-next-btn svg, .shaka-rec-btn svg, .shaka-quad-btn svg{width:18px;height:18px;display:block} 
+.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-share-btn, .shaka-custom-fs-btn, .custom-q-trigger-btn, .shaka-reload-btn, .shaka-theater-btn, .shaka-next-btn {background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;} 
+.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-share-btn:hover, .shaka-custom-fs-btn:hover, .custom-q-trigger-btn:hover, .shaka-reload-btn:hover, .shaka-theater-btn:hover, .shaka-next-btn:hover{opacity:1} 
+.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-share-btn svg, .shaka-custom-fs-btn svg, .custom-q-trigger-btn svg, .shaka-reload-btn svg, .shaka-theater-btn svg, .shaka-next-btn svg{width:18px;height:18px;display:block} 
 .shaka-wa-btn svg{fill:#25D366} 
 .shaka-lock-btn svg{fill:#ffffff} 
 .shaka-timer-btn svg{fill:#ffcc00} 
@@ -136,7 +82,7 @@ video.mode-cover{object-fit:cover!important}
 .shaka-custom-fs-btn svg{fill:#38bdf8} 
 .shaka-reload-btn svg{fill:#df72} 
 .shaka-theater-btn svg{fill:#fb923c} 
-.shaka-next-btn svg, .shaka-rec-btn svg, .shaka-quad-btn svg{fill:#ffffff} 
+.shaka-next-btn svg{fill:#ffffff} 
 .shaka-pip-btn svg, .custom-q-trigger-btn svg{fill:#ffffff} 
 #stats-hud { position: absolute; top: 50px; left: 14px; z-index: 10002; background: rgba(10, 10, 14, 0.9); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 12px 14px; color: #00f0ff; font-family: monospace; font-size: 11px; line-height: 1.6; display: none; backdrop-filter: blur(8px); box-shadow: 0 4px 16px rgba(0,0,0,0.8); max-width: 280px; } 
 #stats-hud h3 { font-size: 12px; color: #fff; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; } 
@@ -203,14 +149,6 @@ video.mode-cover{object-fit:cover!important}
 </div> 
 <div id="ch-grid"></div> 
 </div> 
-
-<div id="quad-view-container">
-  <button id="close-quad-btn">Exit Multi-View</button>
-  <div class="quad-slot" id="qs-1"><select class="quad-picker" data-slot="1"></select></div>
-  <div class="quad-slot" id="qs-2"><select class="quad-picker" data-slot="2"></select></div>
-  <div class="quad-slot" id="qs-3"><select class="quad-picker" data-slot="3"></select></div>
-  <div class="quad-slot" id="qs-4"><select class="quad-picker" data-slot="4"></select></div>
-</div>
 
 <div id="pc"> 
 <canvas id="ambient-canvas"></canvas>
@@ -462,8 +400,10 @@ function ensureVideoPlaying() {
   }
 }
 
+// FIX: Popup only shows when Video Player (#pc) is active/playing
 function triggerPopup() { 
-  if (waPopup) {
+  var channelId = getChannelId();
+  if (waPopup && channelId && pcEl.style.display === "flex") {
     waPopup.classList.add('show'); 
   }
 } 
@@ -785,6 +725,8 @@ function toggleFavorite(id) {
 function showChannelList(channels) { 
   hideOverlay(); 
   pcEl.style.display = "none"; 
+  if(waPopup) waPopup.classList.remove("show"); // Ensure Popup Hidden on Home Page
+  
   var fragment = document.createDocumentFragment(); 
   var favs = getFavorites(); 
   var sortedChannels = channels.slice().sort((a, b) => { 
@@ -903,80 +845,6 @@ function buildYoutubeQualityMenu(player) {
   }); 
 } 
 
-// Instant HD Screenshot, GIF & Short Video Clip Generator Engine
-function captureLiveFrameOrClip() {
-  try {
-    var canvas = document.createElement("canvas");
-    canvas.width = vidEl.videoWidth || 1280;
-    canvas.height = vidEl.videoHeight || 720;
-    var ctx = canvas.getContext("2d");
-    ctx.drawImage(vidEl, 0, 0, canvas.width, canvas.height);
-
-    // Overlay Watermark
-    ctx.font = "bold 24px sans-serif";
-    ctx.fillStyle = "rgba(255,255,255,0.7)";
-    ctx.fillText("RK LINK WALA ™", 30, canvas.height - 30);
-
-    canvas.toBlob(function(blob) {
-      var item = new ClipboardItem({ "image/png": blob });
-      navigator.clipboard.write([item]).then(function() {
-        showStatus("HD Screenshot Saved & Copied! 📸", "ok", 3000);
-      }).catch(function() {
-        var a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "sports_live_shot.png";
-        a.click();
-        showStatus("Screenshot Downloaded! 📸", "ok", 3000);
-      });
-    });
-  } catch(err) {
-    showStatus("Frame capture restricted", "warn", 2000);
-  }
-}
-
-// Multi-View Quad Split Screen Setup
-function initQuadViewEngine() {
-  var quadContainer = document.getElementById("quad-view-container");
-  var closeBtn = document.getElementById("close-quad-btn");
-  if(!quadContainer || !closeBtn) return;
-
-  closeBtn.onclick = function() {
-    quadContainer.style.display = "none";
-    for(var i=1; i<=4; i++) {
-      var el = document.getElementById("qs-" + i);
-      if(el) el.innerHTML = '<select class="quad-picker" data-slot="' + i + '"></select>';
-    }
-  };
-
-  var pickers = document.querySelectorAll(".quad-picker");
-  pickers.forEach(function(picker) {
-    picker.innerHTML = '<option value="">-- Select Channel --</option>';
-    cachedChannels.forEach(function(ch) {
-      var opt = document.createElement("option");
-      opt.value = ch.id;
-      opt.textContent = ch.name;
-      picker.appendChild(opt);
-    });
-
-    picker.onchange = function(e) {
-      var selectedId = e.target.value;
-      var slotId = picker.getAttribute("data-slot");
-      var parentSlot = document.getElementById("qs-" + slotId);
-      if(selectedId && parentSlot) {
-        var iframe = document.createElement("iframe");
-        iframe.src = window.location.pathname + "?id=" + encodeURIComponent(selectedId);
-        iframe.style.width = "100%";
-        iframe.style.height = "100%";
-        iframe.style.border = "none";
-        parentSlot.innerHTML = "";
-        parentSlot.appendChild(iframe);
-      }
-    };
-  });
-
-  quadContainer.style.display = "grid";
-}
-
 function injectCustomControls(container, video, player) { 
   var panel = container.querySelector(".shaka-controls-button-panel"); 
   if (!panel) return; 
@@ -987,30 +855,6 @@ function injectCustomControls(container, video, player) {
     wm.textContent = "rktv.live"; 
     controlsContainer.appendChild(wm); 
   } 
-
-  if (!panel.querySelector(".shaka-quad-btn")) {
-    var quadBtn = document.createElement("button");
-    quadBtn.className = "shaka-quad-btn";
-    quadBtn.title = "Multi-View / Quad Stream Mode";
-    quadBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M4 11h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zM4 21h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1zm10 0h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1z"/></svg>';
-    quadBtn.addEventListener("click", function(e) {
-      e.stopPropagation();
-      initQuadViewEngine();
-    });
-    panel.appendChild(quadBtn);
-  }
-
-  if (!panel.querySelector(".shaka-rec-btn")) {
-    var recBtn = document.createElement("button");
-    recBtn.className = "shaka-rec-btn";
-    recBtn.title = "Capture Screenshot / Video Clip";
-    recBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>';
-    recBtn.addEventListener("click", function(e) {
-      e.stopPropagation();
-      captureLiveFrameOrClip();
-    });
-    panel.appendChild(recBtn);
-  }
 
   if (!panel.querySelector(".custom-feed-switcher")) { 
     var switcher = document.createElement("select"); 
@@ -1708,7 +1552,6 @@ async function loadChannel(ch) {
     } 
   }); 
 
-  // Smart Backup Failover Engine (2-Second Buffer Timeout)
   function onStall() { 
     if (vidEl.paused || stallTimer || isRefreshing) return; 
     stallTimer = setTimeout(function () { 
@@ -1717,7 +1560,7 @@ async function loadChannel(ch) {
         if (!liveEdgeTried) tryLiveEdgeRecovery(); 
         else refreshAndReload(); 
       }
-    }, 2000); // 2-second silent failover threshold
+    }, 2000); 
   } 
 
   function onPlaying() { 
