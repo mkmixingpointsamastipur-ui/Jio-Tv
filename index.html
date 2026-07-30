@@ -258,9 +258,9 @@ async function enforceAutoLandscape() {
       await screen.orientation.lock("landscape").catch(function(e) {}); 
     } 
   } catch (err) {} 
-  ensureVideoPlaying(); 
 } 
 
+// FIX: Ensure video playing ONLY if not manually paused by user
 function ensureVideoPlaying() {
   if (audioCtx && audioCtx.state === "suspended") {
     audioCtx.resume().catch(function(){});
@@ -272,7 +272,6 @@ function ensureVideoPlaying() {
   }
 }
 
-// FIX: Always show popup on page load/refresh or channel play
 function triggerPopup() { 
   if (waPopup) {
     waPopup.classList.add('show'); 
@@ -290,16 +289,13 @@ function closePopupAndSave() {
       if (pcEl.requestFullscreen) { 
         pcEl.requestFullscreen().then(function() { 
           enforceAutoLandscape(); 
-          setTimeout(ensureVideoPlaying, 300);
-        }).catch(function(e){ ensureVideoPlaying(); }); 
+        }).catch(function(e){}); 
       } else if (pcEl.webkitRequestFullscreen) { 
         pcEl.webkitRequestFullscreen(); 
         enforceAutoLandscape(); 
-        setTimeout(ensureVideoPlaying, 300);
       } 
     } else { 
       enforceAutoLandscape(); 
-      setTimeout(ensureVideoPlaying, 200);
     } 
   } 
 } 
@@ -1029,7 +1025,6 @@ function injectCustomControls(container, video, player) {
           if (screen.orientation && screen.orientation.unlock) { screen.orientation.unlock(); } 
           applyMode(0); 
         } 
-        ensureVideoPlaying();
       }); 
     }); 
   } 
@@ -1049,7 +1044,6 @@ function injectCustomControls(container, video, player) {
         if (document.exitFullscreen) { document.exitFullscreen().catch(function(){}); } 
         else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } 
       } 
-      setTimeout(ensureVideoPlaying, 200);
     }); 
     panel.appendChild(customFsBtn); 
   } 
@@ -1084,7 +1078,6 @@ function setupSwipeGestures(targetFrame, video) {
 
   targetFrame.addEventListener("touchstart", function(e) { 
     unlockGlobalAudio(); 
-    ensureVideoPlaying();
     if (isInterfaceLocked) return; 
     if (e.touches.length !== 1) return; 
     var isControlsActive = targetFrame.querySelector(".shaka-controls-container")?.getAttribute("shown") === "true"; 
@@ -1307,7 +1300,7 @@ async function loadChannel(ch) {
   var liveEdgeTried = false; 
 
   function tryLiveEdgeRecovery() { 
-    if (isRefreshing) return; 
+    if (isRefreshing || vidEl.paused) return; 
     try { 
       player.goToLive(); 
       liveEdgeTried = true; 
@@ -1316,7 +1309,7 @@ async function loadChannel(ch) {
   } 
 
   async function refreshAndReload() { 
-    if (isRefreshing) return; 
+    if (isRefreshing || vidEl.paused) return; 
     if (refreshCount >= 2) { 
       showStatus("Stream down. Auto-switching to next channel...", "err", 2000); 
       switchToNextChannel(ch.id); 
@@ -1352,6 +1345,7 @@ async function loadChannel(ch) {
 
   var RECOVERABLE = [1001, 1002, 1003, 6006, 6007, 7000, 7001, 7002]; 
   player.addEventListener("error", function (ev) { 
+    if (vidEl.paused) return;
     var err = ev.detail; 
     var code = err && err.code; 
     if (RECOVERABLE.indexOf(code) !== -1) { refreshAndReload(); } 
@@ -1361,13 +1355,16 @@ async function loadChannel(ch) {
     } 
   }); 
 
+  // FIX: Ignore stall events when video is manually paused
   function onStall() { 
-    if (stallTimer || isRefreshing) return; 
+    if (vidEl.paused || stallTimer || isRefreshing) return; 
     showStatus("Buffering...", "warn", 0); 
     stallTimer = setTimeout(function () { 
       stallTimer = null; 
-      if (!liveEdgeTried) tryLiveEdgeRecovery(); 
-      else refreshAndReload(); 
+      if (!vidEl.paused) {
+        if (!liveEdgeTried) tryLiveEdgeRecovery(); 
+        else refreshAndReload(); 
+      }
     }, 4000); 
   } 
 
@@ -1424,10 +1421,6 @@ async function main() {
     } catch (e) { showErrorMsg("Database initialization failure."); } 
   } 
 } 
-
-window.addEventListener("orientationchange", function() {
-  setTimeout(ensureVideoPlaying, 250);
-});
 
 document.addEventListener("DOMContentLoaded", main); 
 })(); 
