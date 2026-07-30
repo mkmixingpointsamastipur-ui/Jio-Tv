@@ -36,6 +36,41 @@ body.data-saver-active #overlay svg, body.data-saver-active .rgb-popup-box {anim
 video, .shaka-video{width:100vw!important;height:100vh!important;object-fit:contain;background:#000000!important;will-change:transform;crossorigin:anonymous!important;transform-origin:center center;transition:transform 0.05s ease-out;} 
 video.mode-fill{object-fit:fill!important} 
 video.mode-cover{object-fit:cover!important} 
+video.audio-only-active { display: none !important; }
+
+/* Custom Settings Menu Panel */
+#settings-panel {
+  position: absolute !important;
+  bottom: 0px !important;
+  left: 0px !important;
+  width: 100% !important;
+  background: rgba(12, 12, 16, 0.95) !important;
+  border-top: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 20px 20px 0 0;
+  padding: 16px 20px 30px 20px;
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+  z-index: 20000 !important;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+#settings-panel.show { display: flex; }
+#settings-panel h2 { color: #fff; font-size: 15px; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.sett-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; color: #e5e5e5; font-size: 13px; }
+.sett-row select { background: #1a1a24; color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 6px 10px; border-radius: 6px; outline: none; font-size: 12px; }
+
+/* Switch Toggle Styling */
+.switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; inset: 0; background-color: #333; transition: .3s; border-radius: 24px; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+input:checked + .slider { background-color: #38bdf8; }
+input:checked + .slider:before { transform: translateX(20px); }
+
 #pc.theater-mode video, #pc.theater-mode .shaka-video { width: 85vw !important; height: 85vh !important; margin: auto; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.9); } 
 .custom-watermark{ position:absolute!important; bottom:20%!important; left:5%!important; z-index:999!important; color:rgba(255,255,255,0.65)!important; font-size:16px!important; font-weight:800!important; font-family:'Impact', 'Arial Black', sans-serif!important; letter-spacing:2px!important; text-transform:uppercase!important; pointer-events:none!important; user-select:none!important; text-shadow: 2px 2px 4px rgba(0,0,0,0.9), -2px -2px 4px rgba(0,0,0,0.9), 2px -2px 4px rgba(0,0,0,0.9), -2px 2px 4px rgba(0,0,0,0.9)!important; } 
 .channel-logo-overlay { position: absolute !important; top: 12px !important; right: 14px !important; z-index: 998 !important; width: 52px !important; height: 52px !important; border-radius: 50% !important; object-fit: cover !important; opacity: 0.85 !important; pointer-events: none !important; user-select: none !important; -webkit-user-select: none !important; box-shadow: 0px 2px 6px rgba(0,0,0,0.6); } 
@@ -55,9 +90,9 @@ video.mode-cover{object-fit:cover!important}
 
 .shaka-controls-button-panel { overflow-x: auto !important; scrollbar-width: none !important; } 
 .shaka-controls-button-panel::-webkit-scrollbar { display: none !important; } 
-.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-share-btn, .shaka-custom-fs-btn, .custom-q-trigger-btn, .shaka-reload-btn, .shaka-theater-btn, .shaka-next-btn {background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;} 
-.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-share-btn:hover, .shaka-custom-fs-btn:hover, .custom-q-trigger-btn:hover, .shaka-reload-btn:hover, .shaka-theater-btn:hover, .shaka-next-btn:hover{opacity:1} 
-.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-share-btn svg, .shaka-custom-fs-btn svg, .custom-q-trigger-btn svg, .shaka-reload-btn svg, .shaka-theater-btn svg, .shaka-next-btn svg{width:18px;height:18px;display:block} 
+.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-share-btn, .shaka-custom-fs-btn, .custom-q-trigger-btn, .shaka-reload-btn, .shaka-theater-btn, .shaka-next-btn, .shaka-sett-btn {background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;} 
+.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-share-btn:hover, .shaka-custom-fs-btn:hover, .custom-q-trigger-btn:hover, .shaka-reload-btn:hover, .shaka-theater-btn:hover, .shaka-next-btn:hover, .shaka-sett-btn:hover{opacity:1} 
+.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-share-btn svg, .shaka-custom-fs-btn svg, .custom-q-trigger-btn svg, .shaka-reload-btn svg, .shaka-theater-btn svg, .shaka-next-btn svg, .shaka-sett-btn svg{width:18px;height:18px;display:block} 
 .shaka-wa-btn svg{fill:#25D366} 
 .shaka-lock-btn svg{fill:#ffffff} 
 .shaka-timer-btn svg{fill:#ffcc00} 
@@ -69,7 +104,7 @@ video.mode-cover{object-fit:cover!important}
 .shaka-custom-fs-btn svg{fill:#38bdf8} 
 .shaka-reload-btn svg{fill:#df72} 
 .shaka-theater-btn svg{fill:#fb923c} 
-.shaka-next-btn svg{fill:#ffffff} 
+.shaka-next-btn svg, .shaka-sett-btn svg{fill:#ffffff} 
 .shaka-pip-btn svg, .custom-q-trigger-btn svg{fill:#ffffff} 
 #stats-hud { position: absolute; top: 50px; left: 14px; z-index: 10002; background: rgba(10, 10, 14, 0.9); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 12px 14px; color: #00f0ff; font-family: monospace; font-size: 11px; line-height: 1.6; display: none; backdrop-filter: blur(8px); box-shadow: 0 4px 16px rgba(0,0,0,0.8); max-width: 280px; } 
 #stats-hud h3 { font-size: 12px; color: #fff; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; } 
@@ -146,6 +181,29 @@ video.mode-cover{object-fit:cover!important}
 <div>Codecs: <span id="st-codec">-</span></div> 
 <div>Dropped Frames: <span id="st-drop">0</span></div> 
 </div> 
+
+<div id="settings-panel">
+  <h2>⚙️ Player Settings</h2>
+  <div class="sett-row">
+    <span>🎙️ Audio Language</span>
+    <select id="audio-lang-select"><option value="auto">Auto (Default)</option></select>
+  </div>
+  <div class="sett-row">
+    <span>📻 Audio Only / Pocket Mode</span>
+    <label class="switch">
+      <input type="checkbox" id="audio-only-toggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+  <div class="sett-row">
+    <span>🌙 Night Voice Equalizer</span>
+    <label class="switch">
+      <input type="checkbox" id="night-mode-toggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+</div>
+
 <div id="live-chat-panel"> 
 <div id="chat-header">Live Chat <span>• Public</span></div> 
 <div id="chat-messages"></div> 
@@ -229,6 +287,7 @@ var tapGate = document.getElementById("tap-gate");
 var floatLock = document.getElementById("floating-lock-btn"); 
 var qMenuEl = document.getElementById("custom-q-menu"); 
 var qListCont = document.getElementById("q-list-container"); 
+var settPanel = document.getElementById("settings-panel");
 var waPopup = document.getElementById("waPopup"); 
 var popupX = document.getElementById("popupX"); 
 var popupJoin = document.getElementById("popupJoin"); 
@@ -260,6 +319,68 @@ var FIT_ICONS = {
 }; 
 var userHasInteracted = false; 
 var isDataSaverEnabled = false;
+
+// Settings Panel Controls
+document.addEventListener("DOMContentLoaded", function() {
+  var langSelect = document.getElementById("audio-lang-select");
+  var audioOnlyToggle = document.getElementById("audio-only-toggle");
+  var nightModeToggle = document.getElementById("night-mode-toggle");
+
+  if(langSelect) {
+    langSelect.addEventListener("change", function(e) {
+      if (!globalPlayer) return;
+      var selectedLang = e.target.value;
+      if (selectedLang === "auto") {
+        globalPlayer.selectAudioLanguage("");
+        showStatus("Audio Language: Auto", "ok", 2000);
+      } else {
+        globalPlayer.selectAudioLanguage(selectedLang);
+        showStatus("Audio Language Switched: " + selectedLang.toUpperCase(), "ok", 2000);
+      }
+      settPanel.classList.remove("show");
+    });
+  }
+
+  if(audioOnlyToggle) {
+    audioOnlyToggle.addEventListener("change", function(e) {
+      var isAudioOnly = e.target.checked;
+      vidEl.classList.toggle("audio-only-active", isAudioOnly);
+      showStatus(isAudioOnly ? "Audio Only Mode Active 📻" : "Video Mode Restored 📺", "ok", 2500);
+      settPanel.classList.remove("show");
+    });
+  }
+
+  if(nightModeToggle) {
+    nightModeToggle.addEventListener("change", function(e) {
+      var isNight = e.target.checked;
+      initializeAudioEngine(vidEl);
+      if (isNight) {
+        applyEqualizerPreset("Vocal Boost");
+        showStatus("Night Mode ON: Commentator Voice Boosted 🌙", "ok", 2500);
+      } else {
+        applyEqualizerPreset("Normal");
+        showStatus("Night Mode OFF", "ok", 2000);
+      }
+      settPanel.classList.remove("show");
+    });
+  }
+});
+
+// Update Audio Language Selector Options dynamically
+function updateAudioLanguagesInSettings(player) {
+  var langSelect = document.getElementById("audio-lang-select");
+  if (!langSelect || !player) return;
+  
+  var langs = player.getAudioLanguages();
+  langSelect.innerHTML = '<option value="auto">Auto (Default)</option>';
+  
+  langs.forEach(function(lang) {
+    var opt = document.createElement("option");
+    opt.value = lang;
+    opt.textContent = lang.toUpperCase();
+    langSelect.appendChild(opt);
+  });
+}
 
 // Data Saver Controller
 var dataSaverBtn = document.getElementById("data-saver-toggle");
@@ -409,7 +530,7 @@ function decodeHTMLEntities(encodedString) {
 } 
 
 function fetchWithTimeout(url, timeoutMs) { 
-  timeoutMs = timeoutMs || 1800; 
+  timeoutMs = timeoutMs || 3500; 
   var controller = new AbortController(); 
   var timer = setTimeout(function() { controller.abort(); }, timeoutMs); 
   return fetch(url, { signal: controller.signal }) 
@@ -530,7 +651,7 @@ async function buildPlayerConfigs(targetId) {
   var possibleCookies = []; 
   var mappingSources = [PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, COOKIE_SOURCES.binge]; 
   var mapResults = await Promise.allSettled( 
-    mappingSources.map(url => fetchWithTimeout(url, 1800).then(r => r.ok ? r.json() : null).catch(() => null)) 
+    mappingSources.map(url => fetchWithTimeout(url, 3500).then(r => r.ok ? r.json() : null).catch(() => null)) 
   ); 
 
   for (var i = 0; i < mapResults.length; i++) { 
@@ -564,9 +685,9 @@ async function buildPlayerConfigs(targetId) {
   var myPath = getUrlBasePath(streamUrl); 
   
   var cookieReqs = [ 
-    fetchWithTimeout(PRIMARY_JSON, 1800).then(r => r.ok ? r.json() : null).catch(() => null), 
-    fetchWithTimeout(FALLBACK_JSON, 1800).then(r => r.ok ? r.json() : null).catch(() => null), 
-    fetchWithTimeout(COOKIE_SOURCES.binge, 1800).then(r => r.ok ? r.json() : null).catch(() => null) 
+    fetchWithTimeout(PRIMARY_JSON, 3500).then(r => r.ok ? r.json() : null).catch(() => null), 
+    fetchWithTimeout(FALLBACK_JSON, 3500).then(r => r.ok ? r.json() : null).catch(() => null), 
+    fetchWithTimeout(COOKIE_SOURCES.binge, 3500).then(r => r.ok ? r.json() : null).catch(() => null) 
   ]; 
   
   var cookieResults = await Promise.allSettled(cookieReqs); 
@@ -596,17 +717,17 @@ async function buildPlayerConfigs(targetId) {
 } 
 
 async function fetchInitialChannelList() { 
-  var cachedData = sessionStorage.getItem("app_cached_channels"); 
-  if (cachedData) { 
-    try { 
+  try {
+    var cachedData = sessionStorage.getItem("app_cached_channels"); 
+    if (cachedData) { 
       var parsed = JSON.parse(cachedData); 
       if (parsed && parsed.length > 0) return parsed; 
-    } catch(e){} 
-  } 
+    } 
+  } catch(e){} 
 
   var channelsMap = {}; 
   var syncLists = [PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, COOKIE_SOURCES.binge]; 
-  var promises = syncLists.map(url => fetchWithTimeout(url, 1500).then(r => r.json()).catch(() => null)); 
+  var promises = syncLists.map(url => fetchWithTimeout(url, 3500).then(r => r.json()).catch(() => null)); 
   var results = await Promise.all(promises); 
 
   results.forEach(data => { 
@@ -624,7 +745,13 @@ async function fetchInitialChannelList() {
 
   var list = []; 
   for (var key in channelsMap) { list.push(channelsMap[key]); } 
-  if (list.length === 0) throw new Error("Empty pool"); 
+  
+  if (list.length === 0) {
+    list = [
+      { id: "1", name: "Star Sports 1 HD", logo: CUSTOM_LOGO },
+      { id: "2", name: "Sports18 1 HD", logo: CUSTOM_LOGO }
+    ];
+  }
 
   try { 
     sessionStorage.setItem("app_cached_channels", JSON.stringify(list)); 
@@ -694,7 +821,7 @@ function toggleFavorite(id) {
 function showChannelList(channels) { 
   hideOverlay(); 
   pcEl.style.display = "none"; 
-  if(waPopup) waPopup.classList.remove("show"); // Ensure Popup Hidden on Home Page
+  if(waPopup) waPopup.classList.remove("show");
   
   var fragment = document.createDocumentFragment(); 
   var favs = getFavorites(); 
@@ -752,6 +879,7 @@ async function handleBackNavigation() {
   if (!channelId) { 
     document.title = "Sports Live"; 
     qMenuEl.classList.remove("show"); 
+    settPanel.classList.remove("show");
     showChannelList(cachedChannels); 
   } else { 
     var ch = cachedChannels.find(c => c.id === channelId); 
@@ -824,6 +952,20 @@ function injectCustomControls(container, video, player) {
     wm.textContent = "rktv.live"; 
     controlsContainer.appendChild(wm); 
   } 
+
+  if (!panel.querySelector(".shaka-sett-btn")) {
+    var settBtn = document.createElement("button");
+    settBtn.className = "shaka-sett-btn";
+    settBtn.title = "Settings";
+    settBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.04-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.02.33-.04.64.04.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>';
+    settBtn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      if(isInterfaceLocked) return;
+      updateAudioLanguagesInSettings(globalPlayer);
+      settPanel.classList.toggle("show");
+    });
+    panel.appendChild(settBtn);
+  }
 
   if (!panel.querySelector(".custom-feed-switcher")) { 
     var switcher = document.createElement("select"); 
@@ -1054,6 +1196,7 @@ function injectCustomControls(container, video, player) {
       pcEl.classList.add("controls-locked"); 
       showFloatingLockTemp(); 
       qMenuEl.classList.remove("show"); 
+      settPanel.classList.remove("show");
       showStatus("Controls Locked", "warn", 3000); 
     }); 
     panel.appendChild(lockBtn); 
@@ -1149,7 +1292,10 @@ function injectCustomControls(container, video, player) {
     panel.appendChild(customFsBtn); 
   } 
 
-  container.addEventListener("click", function() { qMenuEl.classList.remove("show"); }); 
+  container.addEventListener("click", function() { 
+    qMenuEl.classList.remove("show"); 
+    settPanel.classList.remove("show");
+  }); 
 } 
 
 function copyToClipboard(text) { 
@@ -1206,7 +1352,7 @@ function setupSwipeAndZoomGestures(targetFrame, video) {
 
     if (e.touches.length !== 1) return; 
     var isControlsActive = targetFrame.querySelector(".shaka-controls-container")?.getAttribute("shown") === "true"; 
-    if (isControlsActive && e.target.closest(".shaka-controls-button-panel, .shaka-range-container, #custom-q-menu, #live-chat-panel")) return; 
+    if (isControlsActive && e.target.closest(".shaka-controls-button-panel, .shaka-range-container, #custom-q-menu, #settings-panel, #live-chat-panel")) return; 
     
     var touch = e.touches[0]; 
     startX = touch.clientX; 
@@ -1437,6 +1583,7 @@ async function loadChannel(ch) {
         showStatus("Live Connected!", "ok", 4000); 
         triggerPopup(); 
         updateMediaSession(ch.name);
+        updateAudioLanguagesInSettings(player);
       }).catch(function (e) { 
         console.warn("Autoplay blocked, waiting for touch interaction", e); 
       }); 
