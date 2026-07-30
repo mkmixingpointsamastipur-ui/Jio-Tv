@@ -90,9 +90,9 @@ input:checked + .slider:before { transform: translateX(20px); }
 
 .shaka-controls-button-panel { overflow-x: auto !important; scrollbar-width: none !important; } 
 .shaka-controls-button-panel::-webkit-scrollbar { display: none !important; } 
-.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-share-btn, .shaka-custom-fs-btn, .custom-q-trigger-btn, .shaka-reload-btn, .shaka-theater-btn, .shaka-next-btn, .shaka-sett-btn {background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;} 
-.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-share-btn:hover, .shaka-custom-fs-btn:hover, .custom-q-trigger-btn:hover, .shaka-reload-btn:hover, .shaka-theater-btn:hover, .shaka-next-btn:hover, .shaka-sett-btn:hover{opacity:1} 
-.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-share-btn svg, .shaka-custom-fs-btn svg, .custom-q-trigger-btn svg, .shaka-reload-btn svg, .shaka-theater-btn svg, .shaka-next-btn svg, .shaka-sett-btn svg{width:18px;height:18px;display:block} 
+.shaka-fit-btn, .shaka-wa-btn, .shaka-lock-btn, .shaka-timer-btn, .shaka-speed-btn, .shaka-eq-btn, .shaka-pip-btn, .shaka-stats-btn, .shaka-chat-btn, .shaka-share-btn, .shaka-custom-fs-btn, .shaka-reload-btn, .shaka-theater-btn, .shaka-next-btn, .shaka-sett-btn {background:transparent!important;border:none!important;cursor:pointer!important;padding:0 5px!important;opacity:.85;display:flex;align-items:center;justify-content:center;height:100%;transition:opacity .15s;flex-shrink:0!important;} 
+.shaka-fit-btn:hover, .shaka-wa-btn:hover, .shaka-lock-btn:hover, .shaka-timer-btn:hover, .shaka-speed-btn:hover, .shaka-eq-btn:hover, .shaka-pip-btn:hover, .shaka-stats-btn:hover, .shaka-chat-btn:hover, .shaka-share-btn:hover, .shaka-custom-fs-btn:hover, .shaka-reload-btn:hover, .shaka-theater-btn:hover, .shaka-next-btn:hover, .shaka-sett-btn:hover{opacity:1} 
+.shaka-fit-btn svg, .shaka-wa-btn svg, .shaka-lock-btn svg, .shaka-timer-btn svg, .shaka-speed-btn svg, .shaka-eq-btn svg, .shaka-pip-btn svg, .shaka-stats-btn svg, .shaka-chat-btn svg, .shaka-share-btn svg, .shaka-custom-fs-btn svg, .shaka-reload-btn svg, .shaka-theater-btn svg, .shaka-next-btn svg, .shaka-sett-btn svg{width:18px;height:18px;display:block} 
 .shaka-wa-btn svg{fill:#25D366} 
 .shaka-lock-btn svg{fill:#ffffff} 
 .shaka-timer-btn svg{fill:#ffcc00} 
@@ -105,7 +105,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 .shaka-reload-btn svg{fill:#df72} 
 .shaka-theater-btn svg{fill:#fb923c} 
 .shaka-next-btn svg, .shaka-sett-btn svg{fill:#ffffff} 
-.shaka-pip-btn svg, .custom-q-trigger-btn svg{fill:#ffffff} 
+.shaka-pip-btn svg{fill:#ffffff} 
 #stats-hud { position: absolute; top: 50px; left: 14px; z-index: 10002; background: rgba(10, 10, 14, 0.9); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 12px 14px; color: #00f0ff; font-family: monospace; font-size: 11px; line-height: 1.6; display: none; backdrop-filter: blur(8px); box-shadow: 0 4px 16px rgba(0,0,0,0.8); max-width: 280px; } 
 #stats-hud h3 { font-size: 12px; color: #fff; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; } 
 #live-chat-panel { position: absolute; top: 50px; right: 14px; bottom: 80px; width: 260px; z-index: 10001; background: rgba(12, 12, 16, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; display: none; flex-direction: column; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7); overflow: hidden; } 
@@ -125,15 +125,6 @@ input:checked + .slider:before { transform: translateX(20px); }
 .controls-locked .shaka-controls-container { display: none !important; } 
 .shaka-controls-container button{color:#fff!important} 
 .shaka-video-container{background-color:#000!important} 
-#custom-q-menu { position: absolute !important; bottom: 0px !important; left: 0px !important; width: 100% !important; background: rgba(12, 12, 16, 0.95) !important; border-top: 1px solid rgba(56, 189, 248, 0.2); border-radius: 20px 20px 0 0; padding: 16px 0 30px 0; display: none; flex-direction: column; z-index: 20000 !important; box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); max-height: 70vh; overflow-y: auto; transition: transform 0.2s ease-out; } 
-#custom-q-menu.show { display: flex; } 
-#custom-q-menu h2 { color: #fff; font-size: 15px; font-weight: 600; padding: 8px 20px 14px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); } 
-.q-item { padding: 14px 24px; color: #f1f1f1; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: background 0.2s, color 0.2s; } 
-.q-item:hover { background: rgba(56, 189, 248, 0.08); } 
-.q-item:active { background: rgba(255, 255, 255, 0.1); } 
-.q-item.active { color: #38bdf8 !important; font-weight: 600; } 
-.q-item.active::after { content: '\2713'; color: #38bdf8; font-weight: 700; font-size: 14px; } 
-.q-hd-label { font-size: 10px; background: rgba(255, 255, 255, 0.15); color: #aaa; padding: 2px 4px; border-radius: 3px; font-weight: 700; margin-left: 8px; } 
 .shaka-overflow-menu, .shaka-resolution-button, .shaka-fullscreen-button { display: none !important; } 
 .custom-feed-switcher { background: rgba(24, 24, 28, 0.88) !important; color: #fff !important; border: 1px solid rgba(255, 255, 255, 0.15) !important; padding: 5px 8px !important; font-size: 11px !important; font-weight: 500 !important; border-radius: 6px !important; outline: none !important; cursor: pointer !important; margin: 0 4px !important; max-width: 120px !important; font-family: inherit !important; height: 28px !important; letter-spacing: 0.3px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); transition: border-color 0.2s, background 0.2s; flex-shrink: 0 !important; } 
 .custom-feed-switcher:hover { border-color: #38bdf8 !important; background: rgba(30, 30, 35, 0.95) !important; } 
@@ -185,6 +176,10 @@ input:checked + .slider:before { transform: translateX(20px); }
 <div id="settings-panel">
   <h2>⚙️ Player Settings</h2>
   <div class="sett-row">
+    <span>🎥 Video Quality</span>
+    <select id="video-quality-select"><option value="auto">Auto</option></select>
+  </div>
+  <div class="sett-row">
     <span>🎙️ Audio Language</span>
     <select id="audio-lang-select"><option value="auto">Auto (Default)</option></select>
   </div>
@@ -219,10 +214,6 @@ input:checked + .slider:before { transform: translateX(20px); }
 <svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg> 
 </div> 
 <video id="v" autoplay="" muted="" playsinline="" webkit-playsinline="" preload="auto" crossorigin="anonymous"></video> 
-<div id="custom-q-menu"> 
-<h2>Quality for current video</h2> 
-<div id="q-list-container"></div> 
-</div> 
 <div id="tap-gate"> 
 <div id="tap-inner"> 
 <div id="tap-btn"> 
@@ -285,8 +276,6 @@ var pcEl = document.getElementById("pc");
 var vidEl = document.getElementById("v"); 
 var tapGate = document.getElementById("tap-gate"); 
 var floatLock = document.getElementById("floating-lock-btn"); 
-var qMenuEl = document.getElementById("custom-q-menu"); 
-var qListCont = document.getElementById("q-list-container"); 
 var settPanel = document.getElementById("settings-panel");
 var waPopup = document.getElementById("waPopup"); 
 var popupX = document.getElementById("popupX"); 
@@ -322,9 +311,30 @@ var isDataSaverEnabled = false;
 
 // Settings Panel Controls
 document.addEventListener("DOMContentLoaded", function() {
+  var qualSelect = document.getElementById("video-quality-select");
   var langSelect = document.getElementById("audio-lang-select");
   var audioOnlyToggle = document.getElementById("audio-only-toggle");
   var nightModeToggle = document.getElementById("night-mode-toggle");
+
+  if(qualSelect) {
+    qualSelect.addEventListener("change", function(e) {
+      if (!globalPlayer) return;
+      var val = e.target.value;
+      if (val === "auto") {
+        globalPlayer.configure({ abr: { enabled: true } });
+        showStatus("Quality: Auto Mode", "ok", 2000);
+      } else {
+        var h = parseInt(val, 10);
+        var tracks = globalPlayer.getVariantTracks().filter(t => t.height === h);
+        if (tracks.length > 0) {
+          globalPlayer.configure({ abr: { enabled: false } });
+          globalPlayer.selectVariantTrack(tracks[0], true);
+          showStatus("Quality Set: " + h + "p", "ok", 2000);
+        }
+      }
+      settPanel.classList.remove("show");
+    });
+  }
 
   if(langSelect) {
     langSelect.addEventListener("change", function(e) {
@@ -366,20 +376,39 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-// Update Audio Language Selector Options dynamically
-function updateAudioLanguagesInSettings(player) {
+// Update Settings Options (Quality & Languages)
+function populateSettingsMenu(player) {
+  var qualSelect = document.getElementById("video-quality-select");
   var langSelect = document.getElementById("audio-lang-select");
-  if (!langSelect || !player) return;
-  
-  var langs = player.getAudioLanguages();
-  langSelect.innerHTML = '<option value="auto">Auto (Default)</option>';
-  
-  langs.forEach(function(lang) {
-    var opt = document.createElement("option");
-    opt.value = lang;
-    opt.textContent = lang.toUpperCase();
-    langSelect.appendChild(opt);
-  });
+  if (!player) return;
+
+  if (qualSelect) {
+    var tracks = player.getVariantTracks();
+    var heights = [];
+    tracks.forEach(function(t) {
+      if (t.height && heights.indexOf(t.height) === -1) heights.push(t.height);
+    });
+    heights.sort((a, b) => b - a);
+
+    qualSelect.innerHTML = '<option value="auto">Auto</option>';
+    heights.forEach(function(h) {
+      var opt = document.createElement("option");
+      opt.value = h;
+      opt.textContent = h + "p" + (h >= 720 ? " HD" : "");
+      qualSelect.appendChild(opt);
+    });
+  }
+
+  if (langSelect) {
+    var langs = player.getAudioLanguages();
+    langSelect.innerHTML = '<option value="auto">Auto (Default)</option>';
+    langs.forEach(function(lang) {
+      var opt = document.createElement("option");
+      opt.value = lang;
+      opt.textContent = lang.toUpperCase();
+      langSelect.appendChild(opt);
+    });
+  }
 }
 
 // Data Saver Controller
@@ -878,8 +907,7 @@ async function handleBackNavigation() {
   var channelId = getChannelId(); 
   if (!channelId) { 
     document.title = "Sports Live"; 
-    qMenuEl.classList.remove("show"); 
-    settPanel.classList.remove("show");
+    settPanel.classList.remove("show"); 
     showChannelList(cachedChannels); 
   } else { 
     var ch = cachedChannels.find(c => c.id === channelId); 
@@ -894,52 +922,6 @@ function showErrorMsg(msg) {
   setLoadMsg(msg); 
   overlayEl.style.display = "flex"; 
   showStatus(msg, "err", 0); 
-} 
-
-function buildYoutubeQualityMenu(player) { 
-  if (!player) return; 
-  var tracks = player.getVariantTracks(); 
-  var uniqueTracks = []; 
-  var seenHeights = {}; 
-  tracks.forEach(function(t) { 
-    if (t.height && !seenHeights[t.height]) { 
-      seenHeights[t.height] = true; 
-      uniqueTracks.push(t); 
-    } 
-  }); 
-  uniqueTracks.sort((a, b) => b.height - a.height); 
-
-  var config = player.getConfiguration(); 
-  var isAuto = config.abr.enabled; 
-  qListCont.innerHTML = ""; 
-
-  var autoDiv = document.createElement("div"); 
-  autoDiv.className = "q-item" + (isAuto ? " active" : ""); 
-  autoDiv.innerHTML = "<span>Auto</span>"; 
-  autoDiv.addEventListener("click", function(e) { 
-    e.stopPropagation(); 
-    player.configure({ abr: { enabled: true } }); 
-    qMenuEl.classList.remove("show"); 
-    showStatus("Quality Mode: Auto", "ok", 2000); 
-  }); 
-  qListCont.appendChild(autoDiv); 
-
-  uniqueTracks.forEach(function(track) { 
-    var div = document.createElement("div"); 
-    var isCurrentActive = !isAuto && player.getVariantTracks().find(t => t.active && t.height === track.height); 
-    div.className = "q-item" + (isCurrentActive ? " active" : ""); 
-    var resLabel = track.height + "p"; 
-    var hdBadge = (track.height >= 720) ? '<span class="q-hd-label">HD</span>' : ''; 
-    div.innerHTML = "<span>" + resLabel + hdBadge + "</span>"; 
-    div.addEventListener("click", function(e) { 
-      e.stopPropagation(); 
-      player.configure({ abr: { enabled: false } }); 
-      player.selectVariantTrack(track, true); 
-      qMenuEl.classList.remove("show"); 
-      showStatus("Quality Forced: " + resLabel, "ok", 2500); 
-    }); 
-    qListCont.appendChild(div); 
-  }); 
 } 
 
 function injectCustomControls(container, video, player) { 
@@ -961,7 +943,7 @@ function injectCustomControls(container, video, player) {
     settBtn.addEventListener("click", function(e) {
       e.stopPropagation();
       if(isInterfaceLocked) return;
-      updateAudioLanguagesInSettings(globalPlayer);
+      populateSettingsMenu(globalPlayer);
       settPanel.classList.toggle("show");
     });
     panel.appendChild(settBtn);
@@ -990,9 +972,7 @@ function injectCustomControls(container, video, player) {
       setLoadMsg("Switching feed to: " + targetCh.name + "..."); 
       await loadChannel(targetCh); 
     }); 
-    var qBtnAnchor = panel.querySelector(".custom-q-trigger-btn"); 
-    if (qBtnAnchor) panel.insertBefore(switcher, qBtnAnchor); 
-    else panel.appendChild(switcher); 
+    panel.appendChild(switcher); 
   } 
 
   if (!panel.querySelector(".shaka-reload-btn")) { 
@@ -1195,7 +1175,6 @@ function injectCustomControls(container, video, player) {
       isInterfaceLocked = true; 
       pcEl.classList.add("controls-locked"); 
       showFloatingLockTemp(); 
-      qMenuEl.classList.remove("show"); 
       settPanel.classList.remove("show");
       showStatus("Controls Locked", "warn", 3000); 
     }); 
@@ -1222,20 +1201,6 @@ function injectCustomControls(container, video, player) {
     waBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.456L0 24zm6.59-4.846c1.6.95 3.498 1.452 5.418 1.453l.004-.001c5.548 0 10.061-4.512 10.063-10.066.002-2.69-1.043-5.22-2.94-7.119C17.24 1.522 14.717.476 12.01.476c-5.55 0-10.063 4.513-10.066 10.069-.001 1.834.498 3.626 1.446 5.194L1.898 21.3l5.749-1.506zM17.486 14.37c-.3-.149-1.772-.874-2.042-.973-.27-.099-.467-.149-.663.149-.197.297-.76 1.016-.932 1.21-.173.199-.347.223-.647.074-.3-.149-1.268-.467-2.415-1.491-.892-.796-1.78-1.76-1.668-2.079-.174-.297-.019-.459.13-.607.134-.133.3-.347.449-.52.149-.173.198-.298.298-.497.1-.2.05-.374-.025-.523-.075-.149-.663-1.599-.908-2.193-.239-.574-.483-.497-.663-.506-.171-.008-.368-.01-.565-.01-.197 0-.518.074-.789.374-.27.297-1.03 1.016-1.03 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.772-.726 2.022-1.43.25-.704.25-1.309.175-1.43-.075-.124-.27-.198-.57-.347z"/></svg>'; 
     waBtn.addEventListener("click", function(e){ e.stopPropagation(); window.open("https://whatsapp.com/channel/0029Vb6Ckmn1noz7GiJlsP3P", "_blank"); }); 
     panel.appendChild(waBtn); 
-  } 
-
-  if (!panel.querySelector(".custom-q-trigger-btn")) { 
-    var qBtn = document.createElement("button"); 
-    qBtn.className = "custom-q-trigger-btn"; 
-    qBtn.title = "Quality Preferences"; 
-    qBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49-.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3-1.57-3-3.5s1.07-3.5 3-3.5 3 1.57 3 3.5-1.07 3.5-3 3.5z"/></svg>'; 
-    qBtn.addEventListener("click", function(e) { 
-      e.stopPropagation(); 
-      if (isInterfaceLocked) return; 
-      buildYoutubeQualityMenu(globalPlayer); 
-      qMenuEl.classList.toggle("show"); 
-    }); 
-    panel.appendChild(qBtn); 
   } 
 
   if (!panel.querySelector(".shaka-fit-btn")) { 
@@ -1293,7 +1258,6 @@ function injectCustomControls(container, video, player) {
   } 
 
   container.addEventListener("click", function() { 
-    qMenuEl.classList.remove("show"); 
     settPanel.classList.remove("show");
   }); 
 } 
@@ -1352,7 +1316,7 @@ function setupSwipeAndZoomGestures(targetFrame, video) {
 
     if (e.touches.length !== 1) return; 
     var isControlsActive = targetFrame.querySelector(".shaka-controls-container")?.getAttribute("shown") === "true"; 
-    if (isControlsActive && e.target.closest(".shaka-controls-button-panel, .shaka-range-container, #custom-q-menu, #settings-panel, #live-chat-panel")) return; 
+    if (isControlsActive && e.target.closest(".shaka-controls-button-panel, .shaka-range-container, #settings-panel, #live-chat-panel")) return; 
     
     var touch = e.touches[0]; 
     startX = touch.clientX; 
@@ -1583,7 +1547,7 @@ async function loadChannel(ch) {
         showStatus("Live Connected!", "ok", 4000); 
         triggerPopup(); 
         updateMediaSession(ch.name);
-        updateAudioLanguagesInSettings(player);
+        populateSettingsMenu(player);
       }).catch(function (e) { 
         console.warn("Autoplay blocked, waiting for touch interaction", e); 
       }); 
@@ -1607,7 +1571,7 @@ async function loadChannel(ch) {
     vidEl.muted = true; 
   } 
 
-  player.addEventListener("trackschanged", function() { buildYoutubeQualityMenu(player); }); 
+  player.addEventListener("trackschanged", function() { populateSettingsMenu(player); }); 
   var stallTimer = null; 
   var isRefreshing = false; 
   var refreshCount = 0; 
