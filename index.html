@@ -44,24 +44,24 @@ video.audio-only-active { display: none !important; }
   bottom: 0px !important;
   left: 0px !important;
   width: 100% !important;
-  background: rgba(12, 12, 16, 0.95) !important;
-  border-top: 1px solid rgba(56, 189, 248, 0.2);
+  background: rgba(12, 12, 16, 0.96) !important;
+  border-top: 1px solid rgba(56, 189, 248, 0.25);
   border-radius: 20px 20px 0 0;
   padding: 16px 20px 30px 20px;
   display: none;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
   z-index: 20000 !important;
   box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  max-height: 70vh;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  max-height: 75vh;
   overflow-y: auto;
 }
 #settings-panel.show { display: flex; }
 #settings-panel h2 { color: #fff; font-size: 15px; font-weight: 600; padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
-.sett-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; color: #e5e5e5; font-size: 13px; }
-.sett-row select { background: #1a1a24; color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 6px 10px; border-radius: 6px; outline: none; font-size: 12px; }
+.sett-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; color: #e5e5e5; font-size: 13px; }
+.sett-row select { background: #1a1a24; color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 10px; border-radius: 6px; outline: none; font-size: 12px; min-width: 120px; }
 
 /* Switch Toggle Styling */
 .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
@@ -180,11 +180,29 @@ input:checked + .slider:before { transform: translateX(20px); }
     <select id="video-quality-select"><option value="auto">Auto</option></select>
   </div>
   <div class="sett-row">
+    <span>📺 Screen Fit Mode</span>
+    <select id="screen-fit-select">
+      <option value="contain">Fit (Default)</option>
+      <option value="fill">Fill (Stretch)</option>
+      <option value="cover">Crop (Zoom)</option>
+    </select>
+  </div>
+  <div class="sett-row">
+    <span>⏩ Playback Speed</span>
+    <select id="speed-select">
+      <option value="0.75">0.75x</option>
+      <option value="1.0" selected>1.0x (Normal)</option>
+      <option value="1.25">1.25x</option>
+      <option value="1.5">1.5x</option>
+      <option value="2.0">2.0x</option>
+    </select>
+  </div>
+  <div class="sett-row">
     <span>🎙️ Audio Language</span>
     <select id="audio-lang-select"><option value="auto">Auto (Default)</option></select>
   </div>
   <div class="sett-row">
-    <span>📻 Audio Only / Pocket Mode</span>
+    <span>📻 Audio Only Mode</span>
     <label class="switch">
       <input type="checkbox" id="audio-only-toggle">
       <span class="slider"></span>
@@ -312,6 +330,8 @@ var isDataSaverEnabled = false;
 // Settings Panel Controls
 document.addEventListener("DOMContentLoaded", function() {
   var qualSelect = document.getElementById("video-quality-select");
+  var fitSelect = document.getElementById("screen-fit-select");
+  var speedSelect = document.getElementById("speed-select");
   var langSelect = document.getElementById("audio-lang-select");
   var audioOnlyToggle = document.getElementById("audio-only-toggle");
   var nightModeToggle = document.getElementById("night-mode-toggle");
@@ -322,16 +342,36 @@ document.addEventListener("DOMContentLoaded", function() {
       var val = e.target.value;
       if (val === "auto") {
         globalPlayer.configure({ abr: { enabled: true } });
-        showStatus("Quality: Auto Mode", "ok", 2000);
+        showStatus("Quality Mode: Auto ABR", "ok", 2000);
       } else {
-        var h = parseInt(val, 10);
-        var tracks = globalPlayer.getVariantTracks().filter(t => t.height === h);
+        var targetHeight = parseInt(val, 10);
+        globalPlayer.configure({ abr: { enabled: false } });
+        var tracks = globalPlayer.getVariantTracks().filter(t => t.height === targetHeight);
         if (tracks.length > 0) {
-          globalPlayer.configure({ abr: { enabled: false } });
           globalPlayer.selectVariantTrack(tracks[0], true);
-          showStatus("Quality Set: " + h + "p", "ok", 2000);
+          showStatus("Quality Forced: " + targetHeight + "p", "ok", 2000);
         }
       }
+      settPanel.classList.remove("show");
+    });
+  }
+
+  if(fitSelect) {
+    fitSelect.addEventListener("change", function(e) {
+      var m = e.target.value;
+      vidEl.classList.remove("mode-fill", "mode-cover");
+      if (m === "fill") vidEl.classList.add("mode-fill");
+      if (m === "cover") vidEl.classList.add("mode-cover");
+      showStatus("Screen Mode: " + m.toUpperCase(), "ok", 2000);
+      settPanel.classList.remove("show");
+    });
+  }
+
+  if(speedSelect) {
+    speedSelect.addEventListener("change", function(e) {
+      var spd = parseFloat(e.target.value);
+      vidEl.playbackRate = spd;
+      showStatus("Playback Speed: " + spd + "x", "ok", 2000);
       settPanel.classList.remove("show");
     });
   }
@@ -376,7 +416,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-// Update Settings Options (Quality & Languages)
+// Populate Settings Options (Quality & Languages)
 function populateSettingsMenu(player) {
   var qualSelect = document.getElementById("video-quality-select");
   var langSelect = document.getElementById("audio-lang-select");
@@ -939,7 +979,7 @@ function injectCustomControls(container, video, player) {
     var settBtn = document.createElement("button");
     settBtn.className = "shaka-sett-btn";
     settBtn.title = "Settings";
-    settBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.04-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.02.33-.04.64.04.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>';
+    settBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.04-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.488 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.488.488 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.02.33-.04.64.04.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6-3.6z"/></svg>';
     settBtn.addEventListener("click", function(e) {
       e.stopPropagation();
       if(isInterfaceLocked) return;
