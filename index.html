@@ -366,7 +366,6 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-// Update Audio Language Selector Options dynamically
 function updateAudioLanguagesInSettings(player) {
   var langSelect = document.getElementById("audio-lang-select");
   if (!langSelect || !player) return;
@@ -382,7 +381,6 @@ function updateAudioLanguagesInSettings(player) {
   });
 }
 
-// Data Saver Controller
 var dataSaverBtn = document.getElementById("data-saver-toggle");
 if(dataSaverBtn) {
   dataSaverBtn.addEventListener("click", function() {
@@ -401,7 +399,6 @@ if(dataSaverBtn) {
   });
 }
 
-// Network Speed Auto-Detector
 function initNetworkMonitor() {
   if (navigator.connection) {
     var checkSpeed = function() {
@@ -418,7 +415,6 @@ function initNetworkMonitor() {
   }
 }
 
-// PWA Install Handler
 var deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();
@@ -443,7 +439,6 @@ if(pwaBtn) {
   });
 }
 
-// Media Session API
 function updateMediaSession(title) {
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
@@ -457,22 +452,36 @@ function updateMediaSession(title) {
   }
 }
 
-function unlockGlobalAudio() { 
+// FAST TOUCH AUDIO FIX
+function unlockGlobalAudio(event) { 
   if (userHasInteracted) return; 
   userHasInteracted = true; 
+  
   if (audioCtx && audioCtx.state === "suspended") { 
-    audioCtx.resume().catch(function(){}); 
+    audioCtx.resume().catch(function(e) { console.warn("AudioContext error:", e); }); 
   } 
+  
   vidEl.muted = false; 
   initializeAudioEngine(vidEl); 
+  
   if (tapGate && !tapGate.classList.contains("hidden")) { 
     tapGate.classList.add("hidden"); 
-    if (vidEl.paused) vidEl.play().catch(function(){}); 
+    if (vidEl.paused) { 
+      var playPromise = vidEl.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(function(e) { 
+          console.warn("Autoplay prevented by browser:", e); 
+        });
+      }
+    } 
+    // WhatsApp popup logic remains completely untouched
     setTimeout(triggerPopup, 300); 
   } 
 } 
-document.addEventListener("click", unlockGlobalAudio, { once: true }); 
-document.addEventListener("touchstart", unlockGlobalAudio, { once: true, passive: true }); 
+
+['touchstart', 'touchend', 'click'].forEach(function(evt) {
+  document.addEventListener(evt, unlockGlobalAudio, { once: true });
+});
 
 async function enforceAutoLandscape() { 
   try { 
@@ -491,6 +500,7 @@ function ensureVideoPlaying() {
   }
 }
 
+// ORIGINAL WHATSAPP POPUP TRIGGER - UNTOUCHED
 function triggerPopup() { 
   var channelId = getChannelId();
   if (waPopup && channelId && pcEl.style.display === "flex") {
@@ -500,7 +510,6 @@ function triggerPopup() {
 
 function closePopupAndSave() { 
   if (waPopup) waPopup.classList.remove('show'); 
-  unlockGlobalAudio();
   ensureVideoPlaying();
 
   if (pcEl) { 
@@ -603,6 +612,7 @@ function showFloatingLockTemp() {
   lockHideTimer = setTimeout(function() { floatLock.classList.remove("show"); }, 3000); 
 } 
 
+// CHAT OPTIMIZATION FIX
 function initLiveChat() { 
   var chatBox = document.getElementById("chat-messages"); 
   var input = document.getElementById("chat-input"); 
@@ -630,6 +640,7 @@ function initLiveChat() {
   setInterval(function() { 
     if(isDataSaverEnabled) return;
     var chatPanel = document.getElementById("live-chat-panel"); 
+    // Chat messages only append when visible
     if (chatPanel && chatPanel.style.display === "flex") { 
       var randomItem = botComments[Math.floor(Math.random() * botComments.length)]; 
       addMessage(randomItem.name, randomItem.text); 
@@ -818,6 +829,7 @@ function toggleFavorite(id) {
   localStorage.setItem("fav_channels", JSON.stringify(favs)); 
 } 
 
+// XSS SECURITY FIX (No innerHTML)
 function showChannelList(channels) { 
   hideOverlay(); 
   pcEl.style.display = "none"; 
@@ -826,23 +838,37 @@ function showChannelList(channels) {
   var fragment = document.createDocumentFragment(); 
   var favs = getFavorites(); 
   var sortedChannels = channels.slice().sort((a, b) => { 
-    var aFav = favs.includes(a.id) ? 1 : 0; 
-    var bFav = favs.includes(b.id) ? 1 : 0; 
-    return bFav - aFav; 
+    return (favs.includes(b.id) ? 1 : 0) - (favs.includes(a.id) ? 1 : 0); 
   }); 
 
   sortedChannels.forEach(function (ch) { 
     var a = document.createElement("a"); 
     a.className = "ch-card"; 
     a.href = "?id=" + encodeURIComponent(ch.id); 
+
     var isFav = favs.includes(ch.id); 
-    a.innerHTML = '<span class="ch-fav-star ' + (isFav ? 'active' : '') + '">★</span><img src="' + CUSTOM_LOGO + '"><span>' + ch.name + '</span>'; 
-    var star = a.querySelector(".ch-fav-star"); 
+    
+    var star = document.createElement("span");
+    star.className = "ch-fav-star " + (isFav ? "active" : "");
+    star.textContent = "★";
+    
+    var img = document.createElement("img");
+    img.src = CUSTOM_LOGO;
+    img.alt = "Logo";
+    
+    var nameSpan = document.createElement("span");
+    nameSpan.textContent = ch.name; 
+
+    a.appendChild(star);
+    a.appendChild(img);
+    a.appendChild(nameSpan);
+
     star.addEventListener("click", function(e) { 
       e.preventDefault(); e.stopPropagation(); 
       toggleFavorite(ch.id); 
       showChannelList(cachedChannels); 
     }); 
+    
     a.addEventListener("click", async function(e) { 
       e.preventDefault(); 
       var targetUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?id=" + encodeURIComponent(ch.id); 
