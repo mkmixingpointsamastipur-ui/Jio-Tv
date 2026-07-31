@@ -267,9 +267,11 @@ input:checked + .slider:before { transform: translateX(20px); }
   document.head.appendChild(link);
 })();
 
+// ADDED FANCODE JSON
 var PRIMARY_JSON = 'https://sonujson-v2.pages.dev/Data/sports.json'; 
 var FALLBACK_JSON = 'https://sonujson-v2.pages.dev/loura.json'; 
 var MY_MAIN_JSON = "https://sonujson-devloper.vercel.app/Data/sports.json"; 
+var FANCODE_JSON = "https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fan.json";
 var COOKIE_SOURCES = { 
   binge: "https://binge-giotv.pages.dev/data/id.json" 
 }; 
@@ -320,7 +322,6 @@ var FIT_ICONS = {
 var userHasInteracted = false; 
 var isDataSaverEnabled = false;
 
-// Settings Panel Controls
 document.addEventListener("DOMContentLoaded", function() {
   var langSelect = document.getElementById("audio-lang-select");
   var audioOnlyToggle = document.getElementById("audio-only-toggle");
@@ -452,7 +453,6 @@ function updateMediaSession(title) {
   }
 }
 
-// FAST TOUCH AUDIO FIX
 function unlockGlobalAudio(event) { 
   if (userHasInteracted) return; 
   userHasInteracted = true; 
@@ -474,7 +474,6 @@ function unlockGlobalAudio(event) {
         });
       }
     } 
-    // WhatsApp popup logic remains completely untouched
     setTimeout(triggerPopup, 300); 
   } 
 } 
@@ -500,7 +499,6 @@ function ensureVideoPlaying() {
   }
 }
 
-// ORIGINAL WHATSAPP POPUP TRIGGER - UNTOUCHED
 function triggerPopup() { 
   var channelId = getChannelId();
   if (waPopup && channelId && pcEl.style.display === "flex") {
@@ -612,7 +610,6 @@ function showFloatingLockTemp() {
   lockHideTimer = setTimeout(function() { floatLock.classList.remove("show"); }, 3000); 
 } 
 
-// CHAT OPTIMIZATION FIX
 function initLiveChat() { 
   var chatBox = document.getElementById("chat-messages"); 
   var input = document.getElementById("chat-input"); 
@@ -640,7 +637,6 @@ function initLiveChat() {
   setInterval(function() { 
     if(isDataSaverEnabled) return;
     var chatPanel = document.getElementById("live-chat-panel"); 
-    // Chat messages only append when visible
     if (chatPanel && chatPanel.style.display === "flex") { 
       var randomItem = botComments[Math.floor(Math.random() * botComments.length)]; 
       addMessage(randomItem.name, randomItem.text); 
@@ -660,7 +656,8 @@ async function buildPlayerConfigs(targetId) {
   if (!targetId) return null; 
   var baseStreamInfo = null; 
   var possibleCookies = []; 
-  var mappingSources = [PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, COOKIE_SOURCES.binge]; 
+  // ADDED FANCODE_JSON TO MAPPING SOURCES
+  var mappingSources = [PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, FANCODE_JSON, COOKIE_SOURCES.binge]; 
   var mapResults = await Promise.allSettled( 
     mappingSources.map(url => fetchWithTimeout(url, 3500).then(r => r.ok ? r.json() : null).catch(() => null)) 
   ); 
@@ -668,12 +665,14 @@ async function buildPlayerConfigs(targetId) {
   for (var i = 0; i < mapResults.length; i++) { 
     if (mapResults[i].status === 'fulfilled' && mapResults[i].value) { 
       var data = mapResults[i].value; 
-      var arr = Array.isArray(data) ? data : (data.channels || data.result || []); 
+      // UPDATED TO SUPPORT FANCODE .matches ARRAY
+      var arr = data.matches ? data.matches : (Array.isArray(data) ? data : (data.channels || data.result || [])); 
       var found = arr.find(function(c) { 
-        return String(c.id) === String(targetId) || String(c.channel_id) === String(targetId) || String(c.k_id) === String(targetId); 
+        return String(c.id) === String(targetId) || String(c.channel_id) === String(targetId) || String(c.k_id) === String(targetId) || String(c.match_id) === String(targetId); 
       }); 
       if (found) { 
-        var rUrl = found.url || found.stream_url || found.channel_url || found.k_url || ""; 
+        // ADDED cnptv_cdn FOR FANCODE M3U8
+        var rUrl = found.cnptv_cdn || found.url || found.stream_url || found.channel_url || found.k_url || ""; 
         var kId = found.keyId || found.key_id || found.k_keyId || ""; 
         var ky = found.key || found.k_key || ""; 
         if (!kId || !ky) { 
@@ -683,7 +682,8 @@ async function buildPlayerConfigs(targetId) {
           } 
           if (hex.length >= 2) { kId = kId || hex[0]; ky = ky || hex[1]; } 
         } 
-        baseStreamInfo = { url: rUrl.split('?')[0], keyId: kId, key: ky }; 
+        
+        baseStreamInfo = { url: found.cnptv_cdn ? rUrl : rUrl.split('?')[0], keyId: kId, key: ky }; 
         var tk = extractToken(found, rUrl); 
         if (tk) possibleCookies.push(tk); 
         break; 
@@ -737,18 +737,24 @@ async function fetchInitialChannelList() {
   } catch(e){} 
 
   var channelsMap = {}; 
-  var syncLists = [PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, COOKIE_SOURCES.binge]; 
+  // ADDED FANCODE_JSON TO SYNC LISTS
+  var syncLists = [PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, FANCODE_JSON, COOKIE_SOURCES.binge]; 
   var promises = syncLists.map(url => fetchWithTimeout(url, 3500).then(r => r.json()).catch(() => null)); 
   var results = await Promise.all(promises); 
 
   results.forEach(data => { 
     if (data) { 
-      var arr = Array.isArray(data) ? data : (data.channels || data.result || []); 
+      // UPDATED TO SUPPORT FANCODE .matches ARRAY
+      var arr = data.matches ? data.matches : (Array.isArray(data) ? data : (data.channels || data.result || [])); 
       arr.forEach(function(c) { 
-        var id = String(c.id || c.channel_id || c.k_id || ""); 
-        var name = c.name || c.title || c.channel_name || ("Channel " + id); 
-        if (id) { 
-          channelsMap[id] = { id: id, name: name, logo: CUSTOM_LOGO }; 
+        var id = String(c.id || c.channel_id || c.k_id || c.match_id || ""); 
+        var name = c.title || c.name || c.channel_name || ("Channel " + id); 
+        var logo = c.image || CUSTOM_LOGO;
+        var url = c.cnptv_cdn || c.url || c.stream_url;
+        
+        // ONLY ADD IF WE HAVE AN ID AND A URL (Filters out 'UPCOMING' Fancode matches)
+        if (id && url) { 
+          channelsMap[id] = { id: id, name: name, logo: logo }; 
         } 
       }); 
     } 
@@ -829,7 +835,6 @@ function toggleFavorite(id) {
   localStorage.setItem("fav_channels", JSON.stringify(favs)); 
 } 
 
-// XSS SECURITY FIX (No innerHTML)
 function showChannelList(channels) { 
   hideOverlay(); 
   pcEl.style.display = "none"; 
@@ -853,7 +858,8 @@ function showChannelList(channels) {
     star.textContent = "★";
     
     var img = document.createElement("img");
-    img.src = CUSTOM_LOGO;
+    // USE FANCODE THUMBNAIL IF AVAILABLE
+    img.src = ch.logo || CUSTOM_LOGO;
     img.alt = "Logo";
     
     var nameSpan = document.createElement("span");
