@@ -267,11 +267,13 @@ input:checked + .slider:before { transform: translateX(20px); }
   document.head.appendChild(link);
 })();
 
-// ADDED FANCODE JSON
 var PRIMARY_JSON = 'https://sonujson-v2.pages.dev/Data/sports.json'; 
 var FALLBACK_JSON = 'https://sonujson-v2.pages.dev/loura.json'; 
 var MY_MAIN_JSON = "https://sonujson-devloper.vercel.app/Data/sports.json"; 
 var FANCODE_JSON = "https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fan.json";
+var PRIME_JSON = "https://sonujson-devloper.vercel.app/Data/prime.json";
+var WILLOW_JSON = "https://sonujson-devloper.vercel.app/Data/willow.json";
+
 var COOKIE_SOURCES = { 
   binge: "https://binge-giotv.pages.dev/data/id.json" 
 }; 
@@ -656,25 +658,55 @@ async function buildPlayerConfigs(targetId) {
   if (!targetId) return null; 
   var baseStreamInfo = null; 
   var possibleCookies = []; 
-  // ADDED FANCODE_JSON TO MAPPING SOURCES
-  var mappingSources = [PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, FANCODE_JSON, COOKIE_SOURCES.binge]; 
+  
+  // URL MAP WITH DEDICATED REFERERS FOR EACH SOURCE
+  var mappingSources = [
+    { url: PRIMARY_JSON, ref: "https://www.jiotv.com/" },
+    { url: FALLBACK_JSON, ref: "https://www.jiotv.com/" },
+    { url: MY_MAIN_JSON, ref: "https://www.jiotv.com/" },
+    { url: FANCODE_JSON, ref: "https://www.fancode.com/" },
+    { url: PRIME_JSON, ref: "https://www.amazon.com/gp/" },
+    { url: WILLOW_JSON, ref: "https://www.cricbuzz.com" },
+    { url: COOKIE_SOURCES.binge, ref: "https://www.jiotv.com/" }
+  ]; 
+
+  // FETCH ALL JSONS WITH THEIR REFERERS
   var mapResults = await Promise.allSettled( 
-    mappingSources.map(url => fetchWithTimeout(url, 3500).then(r => r.ok ? r.json() : null).catch(() => null)) 
+    mappingSources.map(function(src) { 
+      return fetchWithTimeout(src.url, 3500)
+        .then(function(r) { 
+          return r.ok ? r.json().then(function(d) { return { data: d, ref: src.ref }; }) : null; 
+        })
+        .catch(function() { return null; });
+    }) 
   ); 
 
   for (var i = 0; i < mapResults.length; i++) { 
-    if (mapResults[i].status === 'fulfilled' && mapResults[i].value) { 
-      var data = mapResults[i].value; 
-      // UPDATED TO SUPPORT FANCODE .matches ARRAY
-      var arr = data.matches ? data.matches : (Array.isArray(data) ? data : (data.channels || data.result || [])); 
+    if (mapResults[i].status === 'fulfilled' && mapResults[i].value && mapResults[i].value.data) { 
+      var data = mapResults[i].value.data; 
+      var channelRef = mapResults[i].value.ref;
+      
+      var arr = data.Matches ? data.Matches : (data.matches ? data.matches : (Array.isArray(data) ? data : (data.channels || data.result || []))); 
       var found = arr.find(function(c) { 
         return String(c.id) === String(targetId) || String(c.channel_id) === String(targetId) || String(c.k_id) === String(targetId) || String(c.match_id) === String(targetId); 
       }); 
+      
       if (found) { 
-        // ADDED cnptv_cdn FOR FANCODE M3U8
-        var rUrl = found.cnptv_cdn || found.url || found.stream_url || found.channel_url || found.k_url || ""; 
+        var rUrl = "";
+        if (found.CnpTV) {
+          rUrl = found.CnpTV.akamai_server || found.CnpTV.amazon_server || found.CnpTV.cloudfront_server || "";
+        } else {
+          rUrl = found.cnptv_cdn || found.url || found.stream_url || found.channel_url || found.k_url || ""; 
+        }
+        
         var kId = found.keyId || found.key_id || found.k_keyId || ""; 
         var ky = found.key || found.k_key || ""; 
+        
+        if (found.drm_key && found.drm_key.includes(':')) {
+           kId = found.drm_key.split(':')[0];
+           ky = found.drm_key.split(':')[1];
+        }
+
         if (!kId || !ky) { 
           var hex = []; 
           for (var k in found) { 
@@ -683,7 +715,14 @@ async function buildPlayerConfigs(targetId) {
           if (hex.length >= 2) { kId = kId || hex[0]; ky = ky || hex[1]; } 
         } 
         
-        baseStreamInfo = { url: found.cnptv_cdn ? rUrl : rUrl.split('?')[0], keyId: kId, key: ky }; 
+        // STORE THE CORRECT REFERER FOUND FROM MAPPING
+        baseStreamInfo = { 
+          url: found.cnptv_cdn ? rUrl : rUrl.split('?')[0], 
+          keyId: kId, 
+          key: ky, 
+          referer: channelRef 
+        }; 
+        
         var tk = extractToken(found, rUrl); 
         if (tk) possibleCookies.push(tk); 
         break; 
@@ -723,6 +762,7 @@ async function buildPlayerConfigs(targetId) {
     url: streamUrl, 
     keyId: baseStreamInfo.keyId, 
     key: baseStreamInfo.key, 
+    referer: baseStreamInfo.referer,
     cookies: possibleCookies.length > 0 ? possibleCookies : [""] 
   }; 
 } 
@@ -737,22 +777,25 @@ async function fetchInitialChannelList() {
   } catch(e){} 
 
   var channelsMap = {}; 
-  // ADDED FANCODE_JSON TO SYNC LISTS
-  var syncLists = [PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, FANCODE_JSON, COOKIE_SOURCES.binge]; 
+  var syncLists = [PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, FANCODE_JSON, PRIME_JSON, WILLOW_JSON, COOKIE_SOURCES.binge]; 
   var promises = syncLists.map(url => fetchWithTimeout(url, 3500).then(r => r.json()).catch(() => null)); 
   var results = await Promise.all(promises); 
 
   results.forEach(data => { 
     if (data) { 
-      // UPDATED TO SUPPORT FANCODE .matches ARRAY
-      var arr = data.matches ? data.matches : (Array.isArray(data) ? data : (data.channels || data.result || [])); 
+      var arr = data.Matches ? data.Matches : (data.matches ? data.matches : (Array.isArray(data) ? data : (data.channels || data.result || []))); 
       arr.forEach(function(c) { 
         var id = String(c.id || c.channel_id || c.k_id || c.match_id || ""); 
-        var name = c.title || c.name || c.channel_name || ("Channel " + id); 
+        var name = c.event_name || c.title || c.name || c.channel_name || ("Channel " + id); 
         var logo = c.image || CUSTOM_LOGO;
-        var url = c.cnptv_cdn || c.url || c.stream_url;
         
-        // ONLY ADD IF WE HAVE AN ID AND A URL (Filters out 'UPCOMING' Fancode matches)
+        var url = "";
+        if (c.CnpTV) {
+           url = c.CnpTV.akamai_server || c.CnpTV.amazon_server || c.CnpTV.cloudfront_server || "";
+        } else {
+           url = c.cnptv_cdn || c.url || c.stream_url || "";
+        }
+        
         if (id && url) { 
           channelsMap[id] = { id: id, name: name, logo: logo }; 
         } 
@@ -858,7 +901,6 @@ function showChannelList(channels) {
     star.textContent = "★";
     
     var img = document.createElement("img");
-    // USE FANCODE THUMBNAIL IF AVAILABLE
     img.src = ch.logo || CUSTOM_LOGO;
     img.alt = "Logo";
     
@@ -1600,7 +1642,8 @@ async function loadChannel(ch) {
     player.configure(buildConfigObj(masterConfig)); 
     player.getNetworkingEngine().clearAllRequestFilters(); 
     player.getNetworkingEngine().registerRequestFilter(function (type, req) { 
-      req.headers["Referer"] = "https://www.jiotv.com/"; 
+      // DYNAMIC REFERER FROM CONFIG MAP
+      req.headers["Referer"] = masterConfig.referer || "https://www.jiotv.com/"; 
       req.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6"; 
       if (activeCookie) req.headers["Cookie"] = activeCookie; 
       if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT) { 
@@ -1672,7 +1715,8 @@ async function loadChannel(ch) {
       player.configure(buildConfigObj(masterConfig)); 
       player.getNetworkingEngine().clearAllRequestFilters(); 
       player.getNetworkingEngine().registerRequestFilter(function(type, req) { 
-        req.headers["Referer"] = "https://www.jiotv.com/"; 
+        // DYNAMIC REFERER FROM CONFIG MAP
+        req.headers["Referer"] = masterConfig.referer || "https://www.jiotv.com/"; 
         req.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6"; 
         if (targetCookie) req.headers["Cookie"] = targetCookie; 
         if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT) { 
@@ -1767,7 +1811,5 @@ async function main() {
 document.addEventListener("DOMContentLoaded", main); 
 })(); 
 </script> 
-  <script src="https://pl30637330.effectivecpmnetwork.com/67/22/6b/67226bede53d30b25b5c451d128e3556.js"></script>
-  
 </body> 
 </html>
