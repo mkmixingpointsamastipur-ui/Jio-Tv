@@ -267,17 +267,17 @@ input:checked + .slider:before { transform: translateX(20px); }
   document.head.appendChild(link);
 })();
 
-// ALL JSON SOURCES ADDED
+// ALL JSON SOURCES DEFINED & PRIORITIZED
+var COOKIE_SOURCES = { 
+  binge: "https://binge-giotv.pages.dev/data/id.json" 
+}; 
+var NEW_JIOTV_JSON = "https://sonujson-v3.vercel.app/Data/sports.json"; 
 var PRIMARY_JSON = 'https://sonujson-v2.pages.dev/Data/sports.json'; 
 var FALLBACK_JSON = 'https://sonujson-v2.pages.dev/loura.json'; 
 var MY_MAIN_JSON = "https://sonujson-devloper.vercel.app/Data/sports.json"; 
 var FANCODE_JSON = "https://raw.githubusercontent.com/kajju027/Fancode-Events-Json/main/fan.json";
 var PRIME_JSON = "https://sonujson-devloper.vercel.app/Data/prime.json";
 var WILLOW_JSON = "https://sonujson-devloper.vercel.app/Data/willow.json";
-
-var COOKIE_SOURCES = { 
-  binge: "https://binge-giotv.pages.dev/data/id.json" 
-}; 
 
 var hdneaRegex = /__hdnea__=[a-zA-Z0-9~=\-\_\/\*]+/; 
 var CUSTOM_LOGO = "https://res.cloudinary.com/dgktl7phy/image/upload/f_auto,q_auto/1001220368_dpkmgi"; 
@@ -655,21 +655,23 @@ function initLiveChat() {
   } 
 } 
 
+// MULTI-JSON FALLBACK ENGINE
 async function buildPlayerConfigs(targetId) { 
-  if (!targetId) return null; 
-  var baseStreamInfo = null; 
-  var possibleCookies = []; 
-  // ALL SOURCES ADDED HERE
-  var mappingSources = [PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, FANCODE_JSON, PRIME_JSON, WILLOW_JSON, COOKIE_SOURCES.binge]; 
+  if (!targetId) return []; 
+  
+  // SCAN ALL SOURCES IN PRIORITY ORDER
+  var mappingSources = [COOKIE_SOURCES.binge, NEW_JIOTV_JSON, PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, FANCODE_JSON, PRIME_JSON, WILLOW_JSON]; 
   var mapResults = await Promise.allSettled( 
     mappingSources.map(url => fetchWithTimeout(url, 3500).then(r => r.ok ? r.json() : null).catch(() => null)) 
   ); 
 
+  var allConfigs = []; 
+
   for (var i = 0; i < mapResults.length; i++) { 
     if (mapResults[i].status === 'fulfilled' && mapResults[i].value) { 
       var data = mapResults[i].value; 
-      // PARSE DIFFERENT JSON STRUCTURES
       var arr = data.Matches ? data.Matches : (data.matches ? data.matches : (Array.isArray(data) ? data : (data.channels || data.result || []))); 
+      
       var found = arr.find(function(c) { 
         return String(c.id) === String(targetId) || String(c.channel_id) === String(targetId) || String(c.k_id) === String(targetId) || String(c.match_id) === String(targetId); 
       }); 
@@ -677,7 +679,6 @@ async function buildPlayerConfigs(targetId) {
       if (found) { 
         var rUrl = "";
         if (found.CnpTV) {
-          // AKAMAI SERVER PREFERRED FOR PRIME/WILLOW TO AVOID WEB BLOCK
           rUrl = found.CnpTV.akamai_server || found.CnpTV.amazon_server || found.CnpTV.cloudfront_server || "";
         } else {
           rUrl = found.cnptv_cdn || found.url || found.stream_url || found.channel_url || found.k_url || ""; 
@@ -686,7 +687,6 @@ async function buildPlayerConfigs(targetId) {
         var kId = found.keyId || found.key_id || found.k_keyId || ""; 
         var ky = found.key || found.k_key || ""; 
         
-        // PARSE DRM KEY STRING FOR PRIME/WILLOW (keyId:key)
         if (found.drm_key && found.drm_key.includes(':')) {
            kId = found.drm_key.split(':')[0];
            ky = found.drm_key.split(':')[1];
@@ -700,18 +700,29 @@ async function buildPlayerConfigs(targetId) {
           if (hex.length >= 2) { kId = kId || hex[0]; ky = ky || hex[1]; } 
         } 
         
-        baseStreamInfo = { url: found.cnptv_cdn ? rUrl : rUrl.split('?')[0], keyId: kId, key: ky }; 
+        var sourceUrl = mappingSources[i];
+        var customReferer = "https://www.jiotv.com/";
+        if (sourceUrl === FANCODE_JSON) customReferer = "https://www.fancode.com/";
+        else if (sourceUrl === PRIME_JSON) customReferer = "https://www.amazon.com/gp/";
+        else if (sourceUrl === WILLOW_JSON) customReferer = "https://www.cricbuzz.com/";
+        
+        var baseConfig = { 
+            url: found.cnptv_cdn ? rUrl : rUrl.split('?')[0], 
+            keyId: kId, 
+            key: ky,
+            referer: customReferer,
+            sourceIndex: i
+        }; 
+        
         var tk = extractToken(found, rUrl); 
-        if (tk) possibleCookies.push(tk); 
-        break; 
+        if (tk) baseConfig.directToken = tk;
+        allConfigs.push(baseConfig); 
       } 
     } 
   } 
 
-  if (!baseStreamInfo || !baseStreamInfo.url) return null; 
-  var streamUrl = baseStreamInfo.url; 
-  var myPath = getUrlBasePath(streamUrl); 
-  
+  if (allConfigs.length === 0) return []; 
+
   var cookieReqs = [ 
     fetchWithTimeout(PRIMARY_JSON, 3500).then(r => r.ok ? r.json() : null).catch(() => null), 
     fetchWithTimeout(FALLBACK_JSON, 3500).then(r => r.ok ? r.json() : null).catch(() => null), 
@@ -719,29 +730,37 @@ async function buildPlayerConfigs(targetId) {
   ]; 
   
   var cookieResults = await Promise.allSettled(cookieReqs); 
+  var plChansAll = [];
   cookieResults.forEach(res => { 
     if (res.status === 'fulfilled' && res.value) { 
       var data = res.value; 
       var plChans = Array.isArray(data) ? data : [].concat(data.successful_results || [], data.failed_results || [], data.channels || []); 
-      var matched = plChans.find(function(c) { 
-        if (String(c.channel_id) === String(targetId) || String(c.id) === String(targetId)) return true; 
-        var u = c.error_details ? c.error_details.final_url : (c.url || c.stream_url || ""); 
-        return u && getUrlBasePath(u) === myPath; 
-      }); 
-      if (matched) { 
-        var u = matched.error_details ? matched.error_details.final_url : (matched.url || matched.stream_url || ""); 
-        var tk = extractToken(matched, u); 
-        if (tk && possibleCookies.indexOf(tk) === -1) possibleCookies.push(tk); 
-      } 
+      plChansAll = plChansAll.concat(plChans);
     } 
   }); 
 
-  return { 
-    url: streamUrl, 
-    keyId: baseStreamInfo.keyId, 
-    key: baseStreamInfo.key, 
-    cookies: possibleCookies.length > 0 ? possibleCookies : [""] 
-  }; 
+  allConfigs.forEach(cfg => {
+      var possibleCookies = [];
+      if (cfg.directToken) possibleCookies.push(cfg.directToken);
+      var myPath = getUrlBasePath(cfg.url);
+      
+      plChansAll.forEach(function(c) { 
+          var isMatch = false;
+          if (String(c.channel_id) === String(targetId) || String(c.id) === String(targetId)) isMatch = true;
+          else {
+              var u = c.error_details ? c.error_details.final_url : (c.url || c.stream_url || ""); 
+              if (u && getUrlBasePath(u) === myPath) isMatch = true;
+          }
+          if (isMatch) { 
+              var u = c.error_details ? c.error_details.final_url : (c.url || c.stream_url || ""); 
+              var tk = extractToken(c, u); 
+              if (tk && possibleCookies.indexOf(tk) === -1) possibleCookies.push(tk); 
+          } 
+      }); 
+      cfg.cookies = possibleCookies.length > 0 ? possibleCookies : [""];
+  });
+
+  return allConfigs; 
 } 
 
 async function fetchInitialChannelList() { 
@@ -754,14 +773,12 @@ async function fetchInitialChannelList() {
   } catch(e){} 
 
   var channelsMap = {}; 
-  // ADDED PRIME & WILLOW TO SYNC LISTS
-  var syncLists = [PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, FANCODE_JSON, PRIME_JSON, WILLOW_JSON, COOKIE_SOURCES.binge]; 
+  var syncLists = [COOKIE_SOURCES.binge, NEW_JIOTV_JSON, PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, FANCODE_JSON, PRIME_JSON, WILLOW_JSON]; 
   var promises = syncLists.map(url => fetchWithTimeout(url, 3500).then(r => r.json()).catch(() => null)); 
   var results = await Promise.all(promises); 
 
   results.forEach(data => { 
     if (data) { 
-      // PARSE DIFFERENT JSON STRUCTURES
       var arr = data.Matches ? data.Matches : (data.matches ? data.matches : (Array.isArray(data) ? data : (data.channels || data.result || []))); 
       arr.forEach(function(c) { 
         var id = String(c.id || c.channel_id || c.k_id || c.match_id || ""); 
@@ -776,7 +793,9 @@ async function fetchInitialChannelList() {
         }
         
         if (id && url) { 
-          channelsMap[id] = { id: id, name: name, logo: logo }; 
+          if (!channelsMap[id]) {
+             channelsMap[id] = { id: id, name: name, logo: logo }; 
+          }
         } 
       }); 
     } 
@@ -1604,72 +1623,88 @@ async function loadChannel(ch) {
   if (playerLogo) playerLogo.src = CUSTOM_LOGO; 
   setLoadMsg("Fetching structural cookies..."); 
   
-  var masterConfig = await buildPlayerConfigs(ch.id); 
-  if (!masterConfig || !masterConfig.url) { 
+  var masterConfigs = await buildPlayerConfigs(ch.id); 
+  if (!masterConfigs || masterConfigs.length === 0) { 
     showStatus("Channel offline, failover routing...", "warn", 2000); 
     switchToNextChannel(ch.id); 
     return; 
   } 
 
   var player = await initGlobalPlayerOnce(); 
-  var isPlayed = false; 
-
-  for (var i = 0; i < masterConfig.cookies.length; i++) { 
-    var activeCookie = masterConfig.cookies[i]; 
-    var activeRaw = extractRawCookie(activeCookie); 
-    showStatus("Connecting Node " + (i + 1) + "...", "warn", 1500); 
-    player.configure(buildConfigObj(masterConfig)); 
-    player.getNetworkingEngine().clearAllRequestFilters(); 
-    player.getNetworkingEngine().registerRequestFilter(function (type, req) { 
-      // ADDED DYNAMIC REFERER FOR AMAZON PRIME / WILLOW
-      if (masterConfig.url.includes("akamaihd.net") || masterConfig.url.includes("aiv-cdn") || masterConfig.url.includes("pv-cdn")) {
-        req.headers["Referer"] = "https://www.amazon.com/gp/";
-      } else {
-        req.headers["Referer"] = "https://www.jiotv.com/"; 
-      }
-      req.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6"; 
-      if (activeCookie) req.headers["Cookie"] = activeCookie; 
-      if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT) { 
-        if (activeRaw) req.uris = req.uris.map(function (u) { return appendCookieToUri(u, activeRaw); }); 
-      } 
-    }); 
-
-    try { 
-      setLoadMsg("Spawning stream pipeline..."); 
-      await player.load(masterConfig.url); 
-      vidEl.play().then(function() { 
-        showStatus("Live Connected!", "ok", 4000); 
-        triggerPopup(); 
-        updateMediaSession(ch.name);
-        updateAudioLanguagesInSettings(player);
-      }).catch(function (e) { 
-        console.warn("Autoplay blocked, waiting for touch interaction", e); 
-      }); 
-      isPlayed = true; 
-      hideOverlay(); 
-      break; 
-    } catch (e) { console.warn("Branch node " + (i + 1) + " failed to bind.", e); } 
-  } 
-
-  if (!isPlayed) { 
-    showStatus("Stream node stalled. Auto failover...", "err", 2000); 
-    switchToNextChannel(ch.id); 
-    return; 
-  } 
-
-  if (userHasInteracted) { 
-    tapGate.classList.add("hidden"); 
-    vidEl.muted = false; 
-  } else { 
-    tapGate.classList.remove("hidden"); 
-    vidEl.muted = true; 
-  } 
-
-  player.addEventListener("trackschanged", function() { buildYoutubeQualityMenu(player); }); 
+  var currentConfigIndex = 0;
   var stallTimer = null; 
   var isRefreshing = false; 
   var refreshCount = 0; 
-  var liveEdgeTried = false; 
+  var liveEdgeTried = false;
+
+  if (player.__rktv_error_handler) player.removeEventListener("error", player.__rktv_error_handler);
+  if (player.__rktv_tracks_handler) player.removeEventListener("trackschanged", player.__rktv_tracks_handler);
+
+  player.__rktv_tracks_handler = function() { buildYoutubeQualityMenu(player); };
+  player.addEventListener("trackschanged", player.__rktv_tracks_handler);
+
+  vidEl.onwaiting = null;
+  vidEl.onstalled = null;
+  vidEl.onplaying = null;
+
+  async function attemptPlayConfig() {
+      if (currentConfigIndex >= masterConfigs.length) {
+          showStatus("All JSON sources failed. Auto failover...", "err", 2000);
+          switchToNextChannel(ch.id);
+          return;
+      }
+
+      var masterConfig = masterConfigs[currentConfigIndex];
+      var isPlayed = false;
+
+      showStatus("Connecting Node " + (currentConfigIndex + 1) + " (Source Check)...", "warn", 1500);
+
+      for (var i = 0; i < masterConfig.cookies.length; i++) { 
+        var activeCookie = masterConfig.cookies[i]; 
+        var activeRaw = extractRawCookie(activeCookie); 
+        player.configure(buildConfigObj(masterConfig)); 
+        player.getNetworkingEngine().clearAllRequestFilters(); 
+        player.getNetworkingEngine().registerRequestFilter(function (type, req) { 
+          req.headers["Referer"] = masterConfig.referer || "https://www.jiotv.com/"; 
+          req.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6"; 
+          if (activeCookie) req.headers["Cookie"] = activeCookie; 
+          if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT) { 
+            if (activeRaw) req.uris = req.uris.map(function (u) { return appendCookieToUri(u, activeRaw); }); 
+          } 
+        }); 
+
+        try { 
+          setLoadMsg("Spawning stream pipeline..."); 
+          await player.load(masterConfig.url); 
+          vidEl.play().then(function() { 
+            showStatus("Live Connected!", "ok", 4000); 
+            triggerPopup(); 
+            updateMediaSession(ch.name);
+            updateAudioLanguagesInSettings(player);
+          }).catch(function (e) { 
+            console.warn("Autoplay blocked", e); 
+          }); 
+          isPlayed = true; 
+          hideOverlay(); 
+          break; 
+        } catch (e) { console.warn("Node failed.", e); } 
+      } 
+
+      if (!isPlayed) { 
+        currentConfigIndex++;
+        await attemptPlayConfig();
+      } else { 
+        if (userHasInteracted) { 
+          tapGate.classList.add("hidden"); 
+          vidEl.muted = false; 
+        } else { 
+          tapGate.classList.remove("hidden"); 
+          vidEl.muted = true; 
+        } 
+      }
+  }
+
+  await attemptPlayConfig();
 
   function tryLiveEdgeRecovery() { 
     if (isRefreshing || vidEl.paused) return; 
@@ -1683,27 +1718,33 @@ async function loadChannel(ch) {
   async function refreshAndReload() { 
     if (isRefreshing || vidEl.paused) return; 
     if (refreshCount >= 2) { 
-      switchToNextChannel(ch.id); 
-      return; 
+      currentConfigIndex++;
+      if (currentConfigIndex < masterConfigs.length) {
+          refreshCount = 0;
+          showStatus("Stream unstable. Switching JSON Source...", "warn", 2000);
+          await attemptPlayConfig();
+          return;
+      } else {
+          switchToNextChannel(ch.id);
+          return;
+      }
     } 
     isRefreshing = true; 
     refreshCount++; 
     showStatus("Optimizing cluster...", "warn", 0); 
     try { 
-      var freshConfig = await buildPlayerConfigs(ch.id); 
-      if (!freshConfig || !freshConfig.url) throw new Error(); 
-      masterConfig = freshConfig; 
+      var freshConfigs = await buildPlayerConfigs(ch.id); 
+      if (!freshConfigs || freshConfigs.length === 0) throw new Error(); 
+      var freshConfig = freshConfigs.length > currentConfigIndex ? freshConfigs[currentConfigIndex] : freshConfigs[0];
+      masterConfigs[currentConfigIndex] = freshConfig;
+      var masterConfig = freshConfig;
+
       var targetCookie = masterConfig.cookies[0] || ""; 
       var targetRaw = extractRawCookie(targetCookie); 
       player.configure(buildConfigObj(masterConfig)); 
       player.getNetworkingEngine().clearAllRequestFilters(); 
       player.getNetworkingEngine().registerRequestFilter(function(type, req) { 
-        // ADDED DYNAMIC REFERER FOR AMAZON PRIME / WILLOW
-        if (masterConfig.url.includes("akamaihd.net") || masterConfig.url.includes("aiv-cdn") || masterConfig.url.includes("pv-cdn")) {
-          req.headers["Referer"] = "https://www.amazon.com/gp/";
-        } else {
-          req.headers["Referer"] = "https://www.jiotv.com/"; 
-        }
+        req.headers["Referer"] = masterConfig.referer || "https://www.jiotv.com/"; 
         req.headers["User-Agent"] = "plaYtv/7.1.5 (Linux;Android 13) ExoPlayerLib/2.11.6"; 
         if (targetCookie) req.headers["Cookie"] = targetCookie; 
         if (type === shaka.net.NetworkingEngine.RequestType.MANIFEST || type === shaka.net.NetworkingEngine.RequestType.SEGMENT) { 
@@ -1719,18 +1760,25 @@ async function loadChannel(ch) {
     finally { isRefreshing = false; } 
   } 
 
-  var RECOVERABLE = [1001, 1002, 1003, 6006, 6007, 7000, 7001, 7002]; 
-  player.addEventListener("error", function (ev) { 
+  player.__rktv_error_handler = function (ev) { 
     if (vidEl.paused) return;
     var err = ev.detail; 
     var code = err && err.code; 
+    var RECOVERABLE = [1001, 1002, 1003, 6006, 6007, 7000, 7001, 7002]; 
     if (RECOVERABLE.indexOf(code) !== -1) { refreshAndReload(); } 
     else { 
-      switchToNextChannel(ch.id); 
+       currentConfigIndex++;
+       if (currentConfigIndex < masterConfigs.length) {
+           showStatus("Hard error. Switching JSON Source...", "warn", 2000);
+           attemptPlayConfig();
+       } else {
+           switchToNextChannel(ch.id); 
+       }
     } 
-  }); 
+  };
+  player.addEventListener("error", player.__rktv_error_handler);
 
-  function onStall() { 
+  vidEl.onwaiting = function() { 
     if (vidEl.paused || stallTimer || isRefreshing) return; 
     stallTimer = setTimeout(function () { 
       stallTimer = null; 
@@ -1739,17 +1787,14 @@ async function loadChannel(ch) {
         else refreshAndReload(); 
       }
     }, 2000); 
-  } 
+  };
+  vidEl.onstalled = vidEl.onwaiting;
 
-  function onPlaying() { 
+  vidEl.onplaying = function() { 
     if (stallTimer) { clearTimeout(stallTimer); stallTimer = null; } 
     liveEdgeTried = false; 
     showStatus("Live", "ok", 3000); 
-  } 
-
-  vidEl.addEventListener("waiting", onStall); 
-  vidEl.addEventListener("stalled", onStall); 
-  vidEl.addEventListener("playing", onPlaying); 
+  };
 } 
 
 async function switchToNextChannel(currentFailedId) { 
