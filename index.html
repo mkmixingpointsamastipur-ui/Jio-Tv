@@ -7,6 +7,61 @@
 <title>Sports Live</title> 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shaka-player@4.16.2/dist/controls.css"> 
 <script defer src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script> 
+
+<!-- ADVANCED SECURITY MODULE START -->
+<script>
+(function() {
+    "use strict";
+    var myOfficialWebsite = "https://www.rktv.live"; 
+    if (window.top !== window.self) {
+        window.top.location.href = myOfficialWebsite;
+    }
+
+    var allowedDomains = ["localhost", "127.0.0.1", "rktv.live", "www.rktv.live", "rktv.pages.dev", "rk-link-wala.blogspot.com", "rktv2live.blogspot.com"]; 
+    var currentDomain = window.location.hostname;
+    
+    if (currentDomain && allowedDomains.indexOf(currentDomain) === -1) {
+        document.documentElement.innerHTML = "<body style='background:#0a0a0a;color:#f87171;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;'><h2>⛔ Unauthorized Domain. Stream Stealing is Prohibited!</h2></body>";
+        throw new Error("Security Exception: Unauthorized domain execution.");
+    }
+
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault();
+            return false;
+        }
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
+            e.preventDefault();
+            return false;
+        }
+        if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
+            e.preventDefault();
+            return false;
+        }
+        if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    setInterval(function() {
+        var before = new Date().getTime();
+        (function() { return false; }['constructor']('debugger')());
+        var after = new Date().getTime();
+        if (after - before > 100) {
+            document.body.innerHTML = "";
+        }
+    }, 2000);
+
+    console.log = console.warn = console.info = console.error = function () { };
+})();
+</script>
+<!-- ADVANCED SECURITY MODULE END -->
+
 <style> 
 *{margin:0;padding:0;box-sizing:border-box} 
 html,body{width:100%;height:100%;background:#0a0a0a;overflow:hidden;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} 
@@ -154,56 +209,6 @@ input:checked + .slider:before { transform: translateX(20px); }
 </style> 
 <style type="text/css">* {user-select: auto !important; -webkit-user-select: auto !important;}</style></head> 
 <body> 
-
-<!-- BASE64 ENCRYPTED ADVANCED SECURITY MODULE -->
-<script>
-(function() {
-    "use strict";
-    
-    // Base64 Decryption Utility
-    function d(b64) {
-        try { return atob(b64); } catch(e) { return ""; }
-    }
-
-    // 1. Anti-Iframe & Auto Redirect (Base64)
-    var myOfficialWebsite = d("aHR0cHM6Ly93d3cucmt0di5saXZl"); 
-    if (window.top !== window.self) {
-        window.top.location.href = myOfficialWebsite;
-    }
-
-    // 2. Domain Lock (rktv.live aur rktv.pages.dev included)
-    var allowedDomains = ["localhost", "127.0.0.1", "rktv.live", "www.rktv.live", "rktv.pages.dev", "rk-link-wala.blogspot.com"]; 
-    var currentDomain = window.location.hostname;
-    
-    if (currentDomain && allowedDomains.indexOf(currentDomain) === -1) {
-        document.documentElement.innerHTML = "<body style='background:#0a0a0a;color:#f87171;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;'><h2>⛔ Unauthorized Domain. Stream Stealing is Prohibited!</h2></body>";
-        throw new Error("Security Exception: Unauthorized domain execution.");
-    }
-
-    // 3. Disable Right-Click
-    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-
-    // 4. Block F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
-        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) { e.preventDefault(); return false; }
-        if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) { e.preventDefault(); return false; }
-        if (e.ctrlKey && (e.key === 'S' || e.key === 's')) { e.preventDefault(); return false; }
-    });
-
-    // 5. DevTools Debugger Trap
-    setInterval(function() {
-        var before = new Date().getTime();
-        (function() { return false; }['constructor']('debugger')());
-        var after = new Date().getTime();
-        if (after - before > 100) { document.body.innerHTML = ""; }
-    }, 2000);
-
-    // 6. Disable Console Logs
-    console.log = console.warn = console.info = console.error = function () { };
-})();
-</script>
-
 <div id="overlay"> 
 <svg width="36" height="36" viewBox="0 0 40 40" fill="none"> 
 <circle cx="20" cy="20" r="16" stroke="#161616" stroke-width="4"></circle> 
@@ -262,7 +267,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 <button id="chat-send">Send</button> 
 </div> 
 </div> 
-<img alt="Channel Brand Logo" class="channel-logo-overlay" src="https://res.cloudinary.com/dgktl7phy/image/upload/f_auto,q_auto/1001220368_dpkmgi"> 
+<img alt="Channel Brand Logo" id="brand-logo-img" class="channel-logo-overlay" src=""> 
 <div id="brightness-overlay"></div> 
 <div id="gesture-indicator"></div> 
 <div id="floating-lock-btn"> 
@@ -291,7 +296,7 @@ input:checked + .slider:before { transform: translateX(20px); }
 <p class="sub-title">Join our WhatsApp Channel</p> 
 <h1 class="brand-name">RK LINK WALA ™</h1> 
 <p class="footer-text">For Instant Updates & Exclusive Links.</p> 
-<a href="https://whatsapp.com/channel/0029Vb6Ckmn1noz7GiJlsP3P" class="rgb-join-btn" id="popupJoin" target="_blank">JOIN NOW</a> 
+<a href="" class="rgb-join-btn" id="popupJoin" target="_blank">JOIN NOW</a> 
 <button class="rgb-already-btn" id="popupAlready">Already Joined</button> 
 </div> 
 </div> 
@@ -300,10 +305,27 @@ input:checked + .slider:before { transform: translateX(20px); }
 (function () { 
 "use strict"; 
 
-// Base64 helper decode function
-function decodeB64(b64) {
-    try { return atob(b64); } catch(e) { return ""; }
-}
+// Base64 Decryption Helper
+function _d(b) { return atob(b); }
+
+// Encrypted Configuration Values
+var WA_LINK = _d("aHR0cHM6Ly93aGF0c2FwcC5jb20vY2hhbm5lbC8wMDI5VmI2Q2ttbjFub3o3R2pKbHNQM1A=");
+var CUSTOM_LOGO = _d("aHR0cHM6Ly9yZXMuY2xvdWRpbmFyeS5jb20vZGdrdGw3cGh5L2ltYWdlL3VwbG9hZC9mX2F1dG8scV9hdXRvLzEwMDEyMjAzNjhfZHBrbWdp");
+var WATERMARK_TEXT = _d("cmt0di5saXZl");
+
+// Encrypted JSON Sources
+var COOKIE_SOURCES = { binge: _d("aHR0cHM6Ly9iaW5nZS1naW90di5wYWdlcy5kZXYvZGF0YS9pZC5qc29u") }; 
+var FANCODE_JSON = _d("aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2thamp1MDI3L0ZhbmNvZGUtRXZlbnRzLUpzb24vbWFpbi9mYW4uanNvbg==");
+var WILLOW_CF_JSON = _d("aHR0cHM6Ly9zb251anNvbi12My5wYWdlcy5kZXYvRGF0YS93aWxsb3cuanNvbg=="); 
+var WILLOW_JSON = _d("aHR0cHM6Ly9zb251anNvbi1kZXZsb3Blci52ZXJjZWwuYXBwL0RhdGEvd2lsbG93Lmpzb24=");
+var PRIME_CF_JSON = _d("aHR0cHM6Ly9zb251anNvbi12My5wYWdlcy5kZXYvRGF0YS9wcmltZS5qc29u"); 
+var PRIME_JSON = _d("aHR0cHM6Ly9zb251anNvbi1kZXZsb3Blci52ZXJjZWwuYXBwL0RhdGEvcHJpbWUuanNvbg==");
+
+var NEW_JIOTV_CF_JSON = _d("aHR0cHM6Ly9zb251anNvbi12My5wYWdlcy5kZXYvRGF0YS9zcG9ydHMuanNvbg=="); 
+var NEW_JIOTV_JSON = _d("aHR0cHM6Ly9zb251anNvbi12My52ZXJjZWwuYXBwL0RhdGEvc3BvcnRzLmpzb24="); 
+var PRIMARY_JSON = _d("aHR0cHM6Ly9zb251anNvbi12Mi5wYWdlcy5kZXYvRGF0YS9zcG9ydHMuanNvbg=="); 
+var FALLBACK_JSON = _d("aHR0cHM6Ly9zb251anNvbi12Mi5wYWdlcy5kZXYvbG91cmEuanNvbg=="); 
+var MY_MAIN_JSON = _d("aHR0cHM6Ly9zb251anNvbi1kZXZsb3Blci52ZXJjZWwuYXBwL0RhdGEvc3BvcnRzLmpzb24="); 
 
 (function injectPWAManifest() {
   var manifest = {
@@ -313,7 +335,7 @@ function decodeB64(b64) {
     display: "standalone",
     background_color: "#0a0a0a",
     theme_color: "#38bdf8",
-    icons: [{ src: "https://res.cloudinary.com/dgktl7phy/image/upload/f_auto,q_auto/1001220368_dpkmgi", sizes: "512x512", type: "image/png" }]
+    icons: [{ src: CUSTOM_LOGO, sizes: "512x512", type: "image/png" }]
   };
   var blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
   var link = document.createElement('link');
@@ -322,25 +344,18 @@ function decodeB64(b64) {
   document.head.appendChild(link);
 })();
 
-// ALL JSON SOURCES & CONFIGS ENCRYPTED IN BASE64
-var COOKIE_SOURCES = { binge: decodeB64("aHR0cHM6Ly9iaW5nZS1naW90di5wYWdlcy5kZXYvZGF0YS9pZC5qc29u") }; 
-var NEW_JIOTV_JSON = decodeB64("aHR0cHM6Ly9zb251anNvbi12My52ZXJjZWwuYXBwL0RhdGEvc3BvcnRzLmpzb24="); 
-var PRIMARY_JSON = decodeB64("aHR0cHM6Ly9zb251anNvbi12Mi5wYWdlcy5kZXYvRGF0YS9zcG9ydHMuanNvbg=="); 
-var FALLBACK_JSON = decodeB64("aHR0cHM6Ly9zb251anNvbi12Mi5wYWdlcy5kZXYvbG91cmEuanNvbg=="); 
-var MY_MAIN_JSON = decodeB64("aHR0cHM6Ly9zb251anNvbi1kZXZsb3Blci52ZXJjZWwuYXBwL0RhdGEvc3BvcnRzLmpzb24="); 
-var FANCODE_JSON = decodeB64("aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL2thamp1MDI3L0ZhbmNvZGUtRXZlbnRzLUpzb24vbWFpbi9mYW4uanNvbg==");
-var PRIME_JSON = decodeB64("aHR0cHM6Ly9zb251anNvbi1kZXZsb3Blci52ZXJjZWwuYXBwL0RhdGEvcHJpbWUuanNvbg==");
-var WILLOW_JSON = decodeB64("aHR0cHM6Ly9zb251anNvbi1kZXZsb3Blci52ZXJjZWwuYXBwL0RhdGEvd2lsbG93Lmpzb24=");
+// Set Dynamic Image & WhatsApp Link
+document.addEventListener("DOMContentLoaded", function() {
+  var logoEl = document.getElementById("brand-logo-img");
+  if(logoEl) logoEl.src = CUSTOM_LOGO;
+  var popupJoinBtn = document.getElementById("popupJoin");
+  if(popupJoinBtn) popupJoinBtn.href = WA_LINK;
+});
 
-// OTHER BASE64 ASSETS (Watermark & WhatsApp)
-var CUSTOM_WATERMARK_TEXT = decodeB64("cmt0di5saXZl");
-var WHATSAPP_CHANNEL_LINK = decodeB64("aHR0cHM6Ly93aGF0c2FwcC5jb20vY2hhbm5lbC8wMDI5VmI2Q2ttbjFub3o3R2lKbHNQM1A=");
-
-// GLOBAL IN-MEMORY CACHE ENGINE (For Lightning Fast Switch)
+// GLOBAL IN-MEMORY CACHE ENGINE
 window.GLOBAL_JSON_CACHE = null;
 
 var hdneaRegex = /__hdnea__=[a-zA-Z0-9~=\-\_\/\*]+/; 
-var CUSTOM_LOGO = "https://res.cloudinary.com/dgktl7phy/image/upload/f_auto,q_auto/1001220368_dpkmgi"; 
 var overlayEl = document.getElementById("overlay"); 
 var loadMsgEl = document.getElementById("loadMsg"); 
 var statusEl = document.getElementById("status"); 
@@ -521,7 +536,7 @@ function unlockGlobalAudio(event) {
   userHasInteracted = true; 
   
   if (audioCtx && audioCtx.state === "suspended") { 
-    audioCtx.resume().catch(function(e) { console.warn("AudioContext error:", e); }); 
+    audioCtx.resume().catch(function(e) { }); 
   } 
   
   vidEl.muted = false; 
@@ -532,9 +547,7 @@ function unlockGlobalAudio(event) {
     if (vidEl.paused) { 
       var playPromise = vidEl.play();
       if (playPromise !== undefined) {
-        playPromise.catch(function(e) { 
-          console.warn("Autoplay prevented by browser:", e); 
-        });
+        playPromise.catch(function(e) { });
       }
     } 
     setTimeout(triggerPopup, 300); 
@@ -715,11 +728,25 @@ function initLiveChat() {
   } 
 } 
 
-// CACHE ENGINE: Load All JSONs Once
+// CACHE ENGINE: Load All Decrypted JSONs
 async function loadAllData() {
   if (window.GLOBAL_JSON_CACHE) return window.GLOBAL_JSON_CACHE;
   setLoadMsg("Syncing dynamic cloud catalog...");
-  var mappingSources = [COOKIE_SOURCES.binge, NEW_JIOTV_JSON, PRIMARY_JSON, FALLBACK_JSON, MY_MAIN_JSON, FANCODE_JSON, PRIME_JSON, WILLOW_JSON]; 
+  
+  var mappingSources = [
+    FANCODE_JSON,
+    WILLOW_CF_JSON, 
+    WILLOW_JSON, 
+    PRIME_CF_JSON, 
+    PRIME_JSON, 
+    COOKIE_SOURCES.binge, 
+    NEW_JIOTV_CF_JSON, 
+    NEW_JIOTV_JSON, 
+    PRIMARY_JSON, 
+    FALLBACK_JSON, 
+    MY_MAIN_JSON
+  ]; 
+
   var mapResults = await Promise.allSettled( 
     mappingSources.map(url => fetchWithTimeout(url, 3500).then(r => r.ok ? r.json() : null).catch(() => null)) 
   );
@@ -780,8 +807,8 @@ async function buildPlayerConfigs(targetId) {
       var sourceUrl = cache.sources[i];
       var customReferer = "https://www.jiotv.com/";
       if (sourceUrl === FANCODE_JSON) customReferer = "https://www.fancode.com/";
-      else if (sourceUrl === PRIME_JSON) customReferer = "https://www.amazon.com/gp/";
-      else if (sourceUrl === WILLOW_JSON) customReferer = "https://www.cricbuzz.com/";
+      else if (sourceUrl === PRIME_JSON || sourceUrl === PRIME_CF_JSON) customReferer = "https://www.amazon.com/gp/";
+      else if (sourceUrl === WILLOW_JSON || sourceUrl === WILLOW_CF_JSON) customReferer = "https://www.cricbuzz.com/";
       
       var baseConfig = { 
           url: found.cnptv_cdn ? rUrl : rUrl.split('?')[0], 
@@ -837,10 +864,14 @@ async function fetchInitialChannelList() {
   } catch(e){} 
 
   var cache = await loadAllData();
-  var channelsMap = {}; 
+  var topChannelsMap = {}; 
+  var bottomChannelsMap = {}; 
 
-  cache.data.forEach(data => { 
+  cache.data.forEach(function(data, index) { 
     if (data) { 
+      var sourceUrl = cache.sources[index];
+      var isTopPriority = (sourceUrl === FANCODE_JSON || sourceUrl === PRIME_CF_JSON || sourceUrl === PRIME_JSON || sourceUrl === WILLOW_CF_JSON || sourceUrl === WILLOW_JSON);
+
       var arr = data.iframes ? data.iframes : (data.Matches ? data.Matches : (data.matches ? data.matches : (Array.isArray(data) ? data : (data.channels || data.result || [])))); 
       arr.forEach(function(c) { 
         var id = String(c.id || c.channel_id || c.k_id || c.match_id || ""); 
@@ -855,16 +886,23 @@ async function fetchInitialChannelList() {
         }
         
         if (id && url && url !== "") { 
-          if (!channelsMap[id]) {
-             channelsMap[id] = { id: id, name: name, logo: logo }; 
+          if (isTopPriority) {
+            if (!topChannelsMap[id] && !bottomChannelsMap[id]) {
+              topChannelsMap[id] = { id: id, name: name, logo: logo }; 
+            }
+          } else {
+            if (!topChannelsMap[id] && !bottomChannelsMap[id]) {
+              bottomChannelsMap[id] = { id: id, name: name, logo: logo }; 
+            }
           }
         } 
       }); 
     } 
   }); 
 
-  var list = []; 
-  for (var key in channelsMap) { list.push(channelsMap[key]); } 
+  var topList = Object.values(topChannelsMap);
+  var bottomList = Object.values(bottomChannelsMap);
+  var list = topList.concat(bottomList);
   
   if (list.length === 0) {
     list = [
@@ -1083,7 +1121,7 @@ function injectCustomControls(container, video, player) {
   if (controlsContainer && !controlsContainer.querySelector(".custom-watermark")) { 
     var wm = document.createElement("div"); 
     wm.className = "custom-watermark"; 
-    wm.textContent = CUSTOM_WATERMARK_TEXT; 
+    wm.textContent = WATERMARK_TEXT; 
     controlsContainer.appendChild(wm); 
   } 
 
@@ -1354,7 +1392,7 @@ function injectCustomControls(container, video, player) {
     waBtn.className = "shaka-wa-btn"; 
     waBtn.title = "Join RK LINK WALA"; 
     waBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.456L0 24zm6.59-4.846c1.6.95 3.498 1.452 5.418 1.453l.004-.001c5.548 0 10.061-4.512 10.063-10.066.002-2.69-1.043-5.22-2.94-7.119C17.24 1.522 14.717.476 12.01.476c-5.55 0-10.063 4.513-10.066 10.069-.001 1.834.498 3.626 1.446 5.194L1.898 21.3l5.749-1.506zM17.486 14.37c-.3-.149-1.772-.874-2.042-.973-.27-.099-.467-.149-.663.149-.197.297-.76 1.016-.932 1.21-.173.199-.347.223-.647.074-.3-.149-1.268-.467-2.415-1.491-.892-.796-1.78-1.76-1.668-2.079-.174-.297-.019-.459.13-.607.134-.133.3-.347.449-.52.149-.173.198-.298.298-.497.1-.2.05-.374-.025-.523-.075-.149-.663-1.599-.908-2.193-.239-.574-.483-.497-.663-.506-.171-.008-.368-.01-.565-.01-.197 0-.518.074-.789.374-.27.297-1.03 1.016-1.03 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.772-.726 2.022-1.43.25-.704.25-1.309.175-1.43-.075-.124-.27-.198-.57-.347z"/></svg>'; 
-    waBtn.addEventListener("click", function(e){ e.stopPropagation(); window.open(WHATSAPP_CHANNEL_LINK, "_blank"); }); 
+    waBtn.addEventListener("click", function(e){ e.stopPropagation(); window.open(WA_LINK, "_blank"); }); 
     panel.appendChild(waBtn); 
   } 
 
@@ -1537,7 +1575,7 @@ function setupSwipeAndZoomGestures(targetFrame, video) {
       var nextBright = Math.min(Math.max(startBright + bChange, 10), 100); 
       currentBrightness = nextBright; 
       brOverlay.style.opacity = (100 - currentBrightness) / 100; 
-      showHud("☀️ Brightness: " + Math.round(currentBrightness) + "%"); 
+      showHud("\u2600\uFE0F Brightness: " + Math.round(currentBrightness) + "%"); 
     } else if (mode === "volume") { 
       var vChange = -(deltaY / targetFrame.clientHeight) * 2.5; 
       var virtualVolume = video.volume + vChange; 
@@ -1754,13 +1792,11 @@ async function loadChannel(ch) {
             triggerPopup(); 
             updateMediaSession(ch.name);
             updateAudioLanguagesInSettings(player);
-          }).catch(function (e) { 
-            console.warn("Autoplay blocked", e); 
-          }); 
+          }).catch(function (e) { }); 
           isPlayed = true; 
           hideOverlay(); 
           break; 
-        } catch (e) { console.warn("Node failed.", e); } 
+        } catch (e) { } 
       } 
 
       if (!isPlayed) { 
@@ -1798,7 +1834,7 @@ async function loadChannel(ch) {
           await attemptPlayConfig();
           return;
       } else {
-          window.GLOBAL_JSON_CACHE = null; 
+          window.GLOBAL_JSON_CACHE = null;
           switchToNextChannel(ch.id);
           return;
       }
@@ -1807,7 +1843,7 @@ async function loadChannel(ch) {
     refreshCount++; 
     showStatus("Optimizing cluster...", "warn", 0); 
     try { 
-      window.GLOBAL_JSON_CACHE = null; 
+      window.GLOBAL_JSON_CACHE = null;
       var freshConfigs = await buildPlayerConfigs(ch.id); 
       if (!freshConfigs || freshConfigs.length === 0) throw new Error(); 
       var freshConfig = freshConfigs.length > currentConfigIndex ? freshConfigs[currentConfigIndex] : freshConfigs[0];
@@ -1847,7 +1883,7 @@ async function loadChannel(ch) {
            showStatus("Hard error. Switching JSON Source...", "warn", 2000);
            attemptPlayConfig();
        } else {
-           window.GLOBAL_JSON_CACHE = null; 
+           window.GLOBAL_JSON_CACHE = null;
            switchToNextChannel(ch.id); 
        }
     } 
